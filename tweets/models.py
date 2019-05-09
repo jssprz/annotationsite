@@ -12,12 +12,22 @@ class TweetUser(models.Model):
     def __str__(self):
         return self.screen_name
 
+    class Meta:
+        verbose_name = 'Usuario de Twitter'
+        verbose_name_plural = 'Usuarios de tweets'
+        ordering = ['name']
+
 
 class TweetHashTag(models.Model):
     text = models.CharField(max_length=100)
 
     def __str__(self):
         return self.text
+
+    class Meta:
+        verbose_name = 'Hash-tag de tweet'
+        verbose_name_plural = 'Hash-tags de tweets'
+        ordering = ['text']
 
 
 class Tweet(models.Model):
@@ -54,5 +64,5 @@ class TweetMedia(models.Model):
 
     class Meta:
         verbose_name = 'Imagen de tweet'
-        verbose_name_plural = 'Imágenes de tweet'
+        verbose_name_plural = 'Imágenes de los tweets'
         ordering = ['tweet']
