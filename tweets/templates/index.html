@@ -10,10 +10,18 @@
             </ul>
         </li>
         <li>Cantidad de usarios: {{statistics.users_count}}</li>
-        <li>Cantidad de hashtags: {{statistics.hashtags_count}}
+        <li>Usuarios más activos:
+            <ul>
+            {% for u in statistics.most_active_users %}
+                <li>@{{u.user__screen_name}}: {{u.count}}</li>
+            {% endfor %}
+            </ul>
+        </li>
+        <li>Cantidad de hashtags: {{statistics.hashtags_count}}</li>
+        <li>Hashtags más usados:
             <ul>
             {% for ht in statistics.most_used_hashtags %}
-                <li>{{ht.hashtags}}: {{ht.count}}</li>
+                <li>#{{ht.hashtags}}: {{ht.count}}</li>
             {% endfor %}
             </ul>
         </li>

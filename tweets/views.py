@@ -28,8 +28,7 @@ def index(request):
     template = loader.get_template('index.html')
 
     most_used_hashtags = list(Tweet.objects.values('hashtags').annotate(count=Count('id_str')).order_by('-count')[:10])
-
-    print(most_used_hashtags)
+    most_active_users = list(Tweet.objects.values('user__screen_name').annotate(count=Count('id_str')).order_by('-count')[:10])
 
     context = {
         'statistics': {
@@ -40,7 +39,8 @@ def index(request):
             'not_classified_count': len(TweetMedia.objects.filter(is_meme=None).all()),
             'users_count': len(TweetUser.objects.all()),
             'hashtags_count': len(TweetHashTag.objects.all()),
-            'most_used_hashtags': most_used_hashtags[1:]
+            'most_used_hashtags': most_used_hashtags[1:],
+            'most_active_users': most_active_users,
         }
     }
     return HttpResponse(template.render(context, request))
