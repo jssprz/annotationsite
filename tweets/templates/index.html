@@ -1,7 +1,14 @@
 {% if statistics %}
     <ul>
         <li>Cantidad de tweets: {{statistics.tweets_count}}</li>
-        <li>Cantidad de imágenes: {{statistics.medias_count}}</li>
+        <li>
+            Cantidad de imágenes: {{statistics.medias_count}}
+            <ul>
+                <li>memes: {{statistics.memes_count}}</li>
+                <li>no-memes: {{statistics.noise_count}}</li>
+                <li>sin clasificar: {{statistics.not_classified_count}}</li>
+            </ul>
+        </li>
         <li>Cantidad de usarios: {{statistics.users_count}}</li>
         <li>Cantidad de hashtags: {{statistics.hashtags_count}}</li>
     </ul>

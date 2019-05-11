@@ -29,6 +29,9 @@ def index(request):
         'statistics': {
             'tweets_count': len(Tweet.objects.all()),
             'medias_count': len(TweetMedia.objects.all()),
+            'memes_count': len(TweetMedia.objects.filter(is_meme=True).all()),
+            'noise_count': len(TweetMedia.objects.filter(is_meme=False).all()),
+            'not_classified_count': len(TweetMedia.objects.filter(is_meme=None).all()),
             'users_count': len(TweetUser.objects.all()),
             'hashtags_count': len(TweetHashTag.objects.all()),
         }
