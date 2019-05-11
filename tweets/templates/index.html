@@ -10,7 +10,13 @@
             </ul>
         </li>
         <li>Cantidad de usarios: {{statistics.users_count}}</li>
-        <li>Cantidad de hashtags: {{statistics.hashtags_count}}</li>
+        <li>Cantidad de hashtags: {{statistics.hashtags_count}}
+            <ul>
+            {% for ht in statistics.most_used_hashtags %}
+                <li>{{ht.hashtags}}: {{ht.count}}</li>
+            {% endfor %}
+            </ul>
+        </li>
     </ul>
 {% else %}
     <p>No hay estadísticas disponibles.</p>

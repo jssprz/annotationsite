@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.template import loader
 from django.views.static import serve as static_serve
+from django.db.models import Count
 from .models import Tweet, TweetMedia, TweetUser, TweetHashTag
 
 
@@ -25,6 +26,11 @@ def cors_serve(request, path, document_root=None, show_indexes=False):
 
 def index(request):
     template = loader.get_template('index.html')
+
+    most_used_hashtags = list(Tweet.objects.values('hashtags').annotate(count=Count('id_str')).order_by('-count')[:10])
+
+    print(most_used_hashtags)
+
     context = {
         'statistics': {
             'tweets_count': len(Tweet.objects.all()),
@@ -34,6 +40,7 @@ def index(request):
             'not_classified_count': len(TweetMedia.objects.filter(is_meme=None).all()),
             'users_count': len(TweetUser.objects.all()),
             'hashtags_count': len(TweetHashTag.objects.all()),
+            'most_used_hashtags': most_used_hashtags
         }
     }
     return HttpResponse(template.render(context, request))
