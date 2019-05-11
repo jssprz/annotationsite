@@ -26,7 +26,7 @@ class TweetAdmin(admin.ModelAdmin):
     list_display = ('id_str', 'user', 'text', )
     list_filter = ('hashtags',)
 
-    list_per_page = 10
+    list_per_page = 30
 
     inlines = (TweetMediaInlines,)
 
@@ -37,7 +37,7 @@ class TweetMediaAdmin(admin.ModelAdmin):
 
     list_editable = ('is_meme', )
 
-    list_per_page = 5
+    list_per_page = 10
 
     readonly_fields = ('image_tag', )
 
