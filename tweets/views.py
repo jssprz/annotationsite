@@ -40,7 +40,7 @@ def index(request):
             'not_classified_count': len(TweetMedia.objects.filter(is_meme=None).all()),
             'users_count': len(TweetUser.objects.all()),
             'hashtags_count': len(TweetHashTag.objects.all()),
-            'most_used_hashtags': most_used_hashtags
+            'most_used_hashtags': most_used_hashtags[1:]
         }
     }
     return HttpResponse(template.render(context, request))
