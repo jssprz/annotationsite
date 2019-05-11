@@ -21,7 +21,7 @@ from django.conf.urls.static import static
 from tweets.views import cors_serve
 
 urlpatterns = [
-    path('{}tweets/'.format(settings.BASE_ROOT), include('tweets.urls')),
+    path('{}'.format(settings.BASE_ROOT), include('tweets.urls')),
     path('{}admin/'.format(settings.BASE_ROOT), admin.site.urls),
 ]
 
