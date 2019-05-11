@@ -1,0 +1,10 @@
+{% if statistics %}
+    <ul>
+        <li>Cantidad de tweets: {{statistics.tweets_count}}</li>
+        <li>Cantidad de imágenes: {{statistics.medias_count}}</li>
+        <li>Cantidad de usarios: {{statistics.users_count}}</li>
+        <li>Cantidad de hashtags: {{statistics.hashtags_count}}</li>
+    </ul>
+{% else %}
+    <p>No hay estadísticas disponibles.</p>
+{% endif %}

@@ -1,6 +1,8 @@
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.template import loader
 from django.views.static import serve as static_serve
+from .models import Tweet, TweetMedia, TweetUser, TweetHashTag
 
 
 def cors_serve(request, path, document_root=None, show_indexes=False):
@@ -22,4 +24,13 @@ def cors_serve(request, path, document_root=None, show_indexes=False):
 
 
 def index(request):
-    return HttpResponse('Hello. You\'re at the tweets index.')
+    template = loader.get_template('index.html')
+    context = {
+        'statistics': {
+            'tweets_count': len(Tweet.objects.all()),
+            'medias_count': len(TweetMedia.objects.all()),
+            'users_count': len(TweetUser.objects.all()),
+            'hashtags_count': len(TweetHashTag.objects.all()),
+        }
+    }
+    return HttpResponse(template.render(context, request))
