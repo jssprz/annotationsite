@@ -29,6 +29,7 @@ def index(request):
 
     most_used_hashtags = list(Tweet.objects.values('hashtags').annotate(count=Count('id_str')).order_by('-count')[:10])
     most_active_users = list(Tweet.objects.values('user__screen_name').annotate(count=Count('id_str')).order_by('-count')[:10])
+    most_used_media_types = list(TweetMedia.objects.values('type').annotate(count=Count('id_str')).order_by('-count'))
 
     context = {
         'statistics': {
@@ -39,6 +40,7 @@ def index(request):
             'not_classified_count': len(TweetMedia.objects.filter(is_meme=None).all()),
             'users_count': len(TweetUser.objects.all()),
             'hashtags_count': len(TweetHashTag.objects.all()),
+            'most_used_media_types': most_used_media_types,
             'most_used_hashtags': most_used_hashtags[1:],
             'most_active_users': most_active_users,
         }

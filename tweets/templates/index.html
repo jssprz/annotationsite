@@ -4,9 +4,20 @@
         <li>
             Cantidad de imágenes: {{statistics.medias_count}}
             <ul>
-                <li>memes: {{statistics.memes_count}}</li>
-                <li>no-memes: {{statistics.noise_count}}</li>
-                <li>sin clasificar: {{statistics.not_classified_count}}</li>
+                <li>Datos de la clasificacion:
+                    <ul>
+                        <li>memes: {{statistics.memes_count}}</li>
+                        <li>no-memes: {{statistics.noise_count}}</li>
+                        <li>sin clasificar: {{statistics.not_classified_count}}</li>
+                    </ul>
+                </li>
+                <li>Typos de media mas usados:
+                    <ul>
+                        {% for t in statistics.most_used_media_types %}
+                            <li>{{t.type}}: {{t.count}}</li>
+                        {% endfor %}
+                    </ul>
+                </li>
             </ul>
         </li>
         <li>Cantidad de usarios: {{statistics.users_count}}</li>
