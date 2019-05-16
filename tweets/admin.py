@@ -33,7 +33,7 @@ class TweetAdmin(admin.ModelAdmin):
 
 class TweetMediaAdmin(admin.ModelAdmin):
     list_display = ('id_str', 'tweet', 'get_user', 'url', 'image_tag', 'is_meme',)
-    list_filter = ('is_meme', 'get_user')
+    list_filter = ('is_meme', 'tweet__user')
 
     list_editable = ('is_meme', )
 
