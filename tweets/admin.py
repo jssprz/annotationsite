@@ -31,7 +31,7 @@ class TweetAdmin(admin.ModelAdmin):
 
 
 class TweetMediaAdmin(admin.ModelAdmin):
-    list_display = ('id_str', 'url', 'image_tag', 'is_meme',)
+    list_display = ('id_str', 'url', 'get_users', 'image_tag', 'is_meme',)
     list_filter = ('is_meme',)
 
     list_editable = ('is_meme',)
@@ -40,10 +40,9 @@ class TweetMediaAdmin(admin.ModelAdmin):
 
     readonly_fields = ('image_tag',)
 
-    # def get_user(self, obj):
-    #     return obj.tweet.user
-    # get_user.short_description = 'User'
-    # get_user.admin_order_field = 'tweet__user'
+    def get_users(self, obj):
+        return [', '.join([t.user.name for t in obj.tweets.all()])]
+    get_users.short_description = 'Users'
 
 
 class TweetUserAdmin(admin.ModelAdmin):
