@@ -22,7 +22,7 @@ class TweetMediaInlines(admin.TabularInline):
 
 
 class TweetAdmin(admin.ModelAdmin):
-    list_display = ('id_str', 'user', 'text', )
+    list_display = ('id_str', 'user', 'text', 'images_tags')
     list_filter = ('user', 'hashtags',)
 
     list_per_page = 30

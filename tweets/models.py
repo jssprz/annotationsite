@@ -45,6 +45,8 @@ class TweetMedia(models.Model):
 
     def image_tag(self):
         return mark_safe('<img src="%s" width="150" height="150" />' % self.local_image.url)
+    image_tag.short_description = 'Image'
+    image_tag.allow_tags = True
 
     def cache(self):
         """Store image locally if we have a URL"""
@@ -68,24 +70,21 @@ class TweetMedia(models.Model):
             #     File(open(result[0], 'rb'))
             # )
 
-    image_tag.short_description = 'Image'
-    image_tag.allow_tags = True
-
     def __str__(self):
         return self.id_str
 
     class Meta:
         verbose_name = 'Imagen de tweet'
         verbose_name_plural = 'Imágenes de los tweets'
-        ordering = ['tweet']
+        ordering = ['id_str']
 
 
 class Tweet(models.Model):
     id_str = models.CharField(max_length=100, primary_key=True)
     text = models.TextField()
     user = models.ForeignKey(TweetUser, on_delete=models.CASCADE)
-    hashtags = models.ManyToManyField(TweetHashTag)
-    medias = models.ManyToManyField(TweetMedia)
+    hashtags = models.ManyToManyField(TweetHashTag, related_name='tweets')
+    medias = models.ManyToManyField(TweetMedia, related_name='tweets')
     created_at = models.DateTimeField()
     favorite_count = models.IntegerField()
     retweet_count = models.IntegerField()
@@ -93,6 +92,11 @@ class Tweet(models.Model):
     location = models.CharField(max_length=100, null=True, blank=True)
     coordinates_lat = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     coordinates_long = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+
+    def images_tags(self):
+        return mark_safe(' '.join([m.image_tag() for m in self.medias.all()]))
+    images_tags.short_description = 'Medias'
+    images_tags.allow_tags = True
 
     def __str__(self):
         return self.id_str
