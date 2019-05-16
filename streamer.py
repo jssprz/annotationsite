@@ -105,20 +105,23 @@ class TwitterStreamer(TwythonStreamer):
                               coordinates_long=coordinates_long, coordinates_lat=coordinates_lat, lang=tweet['lang'],
                               user=user_obj, location=user_obj.location)
 
-            tweet_obj.save()
-            tweet_obj.hashtags.set(hashtags_objs)
-
             medias = tweet['entities']['media']
+            media_objs = []
             for i, m in enumerate(medias):
                 if not TweetMedia.objects.filter(id_str=m['id_str']).exists():
                     media_obj = TweetMedia(id_str=m['id_str'], url=m['url'], media_url=m['media_url'],
                                            media_url_https=m['media_url_https'], type=m['type'],
                                            tweet=tweet_obj)
                     media_obj.cache()
-                    media_obj.save()
                 else:
-                    print('duplicated media')
+                    media_obj = TweetMedia.objects.get(id_str=m['id_str'])
+                    print('reused media')
+                media_obj.save()
+                media_objs.append(media_obj)
 
+            tweet_obj.save()
+            tweet_obj.hashtags.set(hashtags_objs)
+            tweet_obj.medias.set(media_objs)
             print('tweet saved')
         else:
             print('duplicated tweet')
@@ -147,7 +150,7 @@ class TwitterStreamer(TwythonStreamer):
                            (tweet['entities']['media'] if 'media' in tweet['entities'] else [])]
         }
 
-    def save_mdias(self, tweet):
+    def save_medias(self, tweet):
         media_urls = [media['media_url'] for media in
                       (tweet['entities']['media'] if 'media' in tweet['entities'] else [])]
         saved_paths = []

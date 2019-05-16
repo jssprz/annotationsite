@@ -34,26 +34,8 @@ class TweetHashTag(models.Model):
         ordering = ['text']
 
 
-class Tweet(models.Model):
-    id_str = models.CharField(max_length=100, primary_key=True)
-    text = models.TextField()
-    user = models.ForeignKey(TweetUser, on_delete=models.CASCADE)
-    hashtags = models.ManyToManyField(TweetHashTag)
-    created_at = models.DateTimeField()
-    favorite_count = models.IntegerField()
-    retweet_count = models.IntegerField()
-    lang = models.CharField(max_length=10)
-    location = models.CharField(max_length=100, null=True, blank=True)
-    coordinates_lat = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
-    coordinates_long = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
-
-    def __str__(self):
-        return self.id_str
-
-
 class TweetMedia(models.Model):
     id_str = models.CharField(max_length=100)
-    tweet = models.ForeignKey(Tweet, on_delete=models.CASCADE)
     url = models.URLField()
     media_url = models.URLField()
     media_url_https = models.URLField()
@@ -68,7 +50,7 @@ class TweetMedia(models.Model):
         """Store image locally if we have a URL"""
 
         if self.media_url and not self.local_image:
-            self.local_image.name = 'tweet_medias/{}'.format(os.path.basename(self.media_url))
+            self.local_image.name = 'tweet_medias/{}_{}'.format(self.id_str, os.path.basename(self.media_url))
             path_to_save = os.path.join(settings.MEDIA_ROOT, self.local_image.name)
 
             http = urllib3.PoolManager()
@@ -96,3 +78,21 @@ class TweetMedia(models.Model):
         verbose_name = 'Imagen de tweet'
         verbose_name_plural = 'Imágenes de los tweets'
         ordering = ['tweet']
+
+
+class Tweet(models.Model):
+    id_str = models.CharField(max_length=100, primary_key=True)
+    text = models.TextField()
+    user = models.ForeignKey(TweetUser, on_delete=models.CASCADE)
+    hashtags = models.ManyToManyField(TweetHashTag)
+    medias = models.ManyToManyField(TweetMedia)
+    created_at = models.DateTimeField()
+    favorite_count = models.IntegerField()
+    retweet_count = models.IntegerField()
+    lang = models.CharField(max_length=10)
+    location = models.CharField(max_length=100, null=True, blank=True)
+    coordinates_lat = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    coordinates_long = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+
+    def __str__(self):
+        return self.id_str

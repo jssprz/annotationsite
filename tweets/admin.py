@@ -1,5 +1,4 @@
 from django.contrib import admin
-from django.contrib.admin.options import TabularInline
 
 from .models import Tweet
 from .models import TweetMedia
@@ -7,10 +6,10 @@ from .models import TweetHashTag
 from .models import TweetUser
 
 
-class TweetMediaInlines(TabularInline):
-    model = TweetMedia
+class TweetMediaInlines(admin.TabularInline):
+    model = Tweet.medias.through
 
-    readonly_fields = ('image_tag',)
+    # readonly_fields = ('image_tag',)
 
     # disable deletion of inspections
     can_delete = True
@@ -24,7 +23,7 @@ class TweetMediaInlines(TabularInline):
 
 class TweetAdmin(admin.ModelAdmin):
     list_display = ('id_str', 'user', 'text', )
-    list_filter = ('hashtags',)
+    list_filter = ('user', 'hashtags',)
 
     list_per_page = 30
 
@@ -32,23 +31,23 @@ class TweetAdmin(admin.ModelAdmin):
 
 
 class TweetMediaAdmin(admin.ModelAdmin):
-    list_display = ('id_str', 'tweet', 'get_user', 'url', 'image_tag', 'is_meme',)
-    list_filter = ('is_meme', 'tweet__user')
+    list_display = ('id_str', 'url', 'image_tag', 'is_meme',)
+    list_filter = ('is_meme',)
 
-    list_editable = ('is_meme', )
+    list_editable = ('is_meme',)
 
     list_per_page = 20
 
-    readonly_fields = ('image_tag', )
+    readonly_fields = ('image_tag',)
 
-    def get_user(self, obj):
-        return obj.tweet.user
-    get_user.short_description = 'User'
-    get_user.admin_order_field = 'tweet__user'
+    # def get_user(self, obj):
+    #     return obj.tweet.user
+    # get_user.short_description = 'User'
+    # get_user.admin_order_field = 'tweet__user'
 
 
 class TweetUserAdmin(admin.ModelAdmin):
-    list_display = ('screen_name', 'name', 'location', 'url')
+    list_display = ('screen_name', 'name', 'location', 'url',)
     list_filter = ('location',)
 
     list_per_page = 30
