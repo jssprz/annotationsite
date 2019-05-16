@@ -41,7 +41,7 @@ class TweetMediaAdmin(admin.ModelAdmin):
     readonly_fields = ('image_tag',)
 
     def get_users(self, obj):
-        return [', '.join([t.user.name for t in obj.tweets.all()])]
+        return [', '.join([t.user.screen_name for t in obj.tweets.all()])]
     get_users.short_description = 'Users'
 
 
