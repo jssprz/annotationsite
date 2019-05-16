@@ -32,17 +32,31 @@ class TweetAdmin(admin.ModelAdmin):
 
 
 class TweetMediaAdmin(admin.ModelAdmin):
-    list_display = ('id_str', 'tweet', 'url', 'image_tag', 'is_meme',)
+    list_display = ('id_str', 'tweet', 'get_user', 'url', 'image_tag', 'is_meme',)
     list_filter = ('is_meme',)
 
     list_editable = ('is_meme', )
 
-    list_per_page = 10
+    list_per_page = 20
 
     readonly_fields = ('image_tag', )
+
+    def get_user(self, obj):
+        return obj.tweet.user
+    get_user.short_description = 'User'
+    get_user.admin_order_field = 'tweet__user'
+
+
+class TweetUserAdmin(admin.ModelAdmin):
+    list_display = ('screen_name', 'name', 'location', 'url')
+    list_filter = ('location',)
+
+    list_per_page = 30
+
+    ordering = ('screen_name',)
 
 
 admin.site.register(Tweet, TweetAdmin)
 admin.site.register(TweetMedia, TweetMediaAdmin)
 admin.site.register(TweetHashTag)
-admin.site.register(TweetUser)
+admin.site.register(TweetUser, TweetUserAdmin)

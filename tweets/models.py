@@ -1,10 +1,8 @@
 import os
-import urllib
 import urllib3
 
 from django.db import models
 from django.utils.safestring import mark_safe
-from django.core.files import File
 from django.conf import settings
 
 
@@ -87,28 +85,6 @@ class TweetMedia(models.Model):
             #     '{}_{}'.format(self.id_str, os.path.basename(self.url)),
             #     File(open(result[0], 'rb'))
             # )
-
-    def download_media(self):
-        """
-
-        :return:
-        """
-
-        http = urllib3.PoolManager()
-        r = http.request('GET', url, preload_content=False)
-
-        path = os.path.abspath(
-            os.path.join(self.__save_media_dir, '{}_{}.{}'.format(tweet['id_str'], i, url.split('.')[-1])))
-
-        with open(path, 'wb') as out:
-            while True:
-                data = r.read()
-                if not data:
-                    break
-                out.write(data)
-                saved_paths.append(path)
-
-        r.release_conn()
 
     image_tag.short_description = 'Image'
     image_tag.allow_tags = True
