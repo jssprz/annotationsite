@@ -110,8 +110,7 @@ class TwitterStreamer(TwythonStreamer):
             for i, m in enumerate(medias):
                 if not TweetMedia.objects.filter(id_str=m['id_str']).exists():
                     media_obj = TweetMedia(id_str=m['id_str'], url=m['url'], media_url=m['media_url'],
-                                           media_url_https=m['media_url_https'], type=m['type'],
-                                           tweet=tweet_obj)
+                                           media_url_https=m['media_url_https'], type=m['type'])
                     media_obj.cache()
                 else:
                     media_obj = TweetMedia.objects.get(id_str=m['id_str'])
