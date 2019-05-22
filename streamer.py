@@ -6,12 +6,11 @@ import sys
 import csv
 import urllib3
 import time
-from datetime import timezone
 from twython import TwythonStreamer
 from argparse import ArgumentParser
 from configuration import ConfigurationFile
 
-# sys.path.append('annotationsite')
+sys.path.append('annotationsite')
 os.environ['DJANGO_SETTINGS_MODULE'] = 'annotationsite.settings'
 import django
 django.setup()
@@ -100,7 +99,8 @@ class TwitterStreamer(TwythonStreamer):
                 coordinates_lat = None
 
             ts = time.strftime('%Y-%m-%d %H:%M:%S',
-                               timezone.utc.localize(time.strptime(tweet['created_at'], '%a %b %d %H:%M:%S +0000 %Y')))
+                               time.strptime(tweet['created_at'],
+                                             '%a %b %d %H:%M:%S {} %Y'.format(time.strftime('%z', time.gmtime()))))
 
             tweet_obj = Tweet(id_str=tweet['id_str'], text=tweet['text'], created_at=ts,
                               favorite_count=tweet['favorite_count'], retweet_count=tweet['retweet_count'],
