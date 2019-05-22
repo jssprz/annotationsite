@@ -6,6 +6,7 @@ import sys
 import csv
 import urllib3
 import time
+from datetime import timezone
 from twython import TwythonStreamer
 from argparse import ArgumentParser
 from configuration import ConfigurationFile
@@ -98,7 +99,8 @@ class TwitterStreamer(TwythonStreamer):
                 coordinates_long = None
                 coordinates_lat = None
 
-            ts = time.strftime('%Y-%m-%d %H:%M:%S', time.strptime(tweet['created_at'], '%a %b %d %H:%M:%S +0000 %Y'))
+            ts = time.strftime('%Y-%m-%d %H:%M:%S',
+                               timezone.utc.localize(time.strptime(tweet['created_at'], '%a %b %d %H:%M:%S +0000 %Y')))
 
             tweet_obj = Tweet(id_str=tweet['id_str'], text=tweet['text'], created_at=ts,
                               favorite_count=tweet['favorite_count'], retweet_count=tweet['retweet_count'],
@@ -108,13 +110,17 @@ class TwitterStreamer(TwythonStreamer):
             medias = tweet['entities']['media']
             media_objs = []
             for i, m in enumerate(medias):
+                # create or get the media object
                 if not TweetMedia.objects.filter(id_str=m['id_str']).exists():
                     media_obj = TweetMedia(id_str=m['id_str'], url=m['url'], media_url=m['media_url'],
                                            media_url_https=m['media_url_https'], type=m['type'])
+                    # download media
                     media_obj.cache()
+                    print('media downloaded from: {}'.format(m['media_url']))
                 else:
                     media_obj = TweetMedia.objects.get(id_str=m['id_str'])
-                    print('reused media')
+                    print('media {} reused'.format(m['id_str']))
+
                 media_obj.save()
                 media_objs.append(media_obj)
 
@@ -122,6 +128,7 @@ class TwitterStreamer(TwythonStreamer):
             tweet_obj.hashtags.set(hashtags_objs)
             tweet_obj.medias.set(media_objs)
             print('tweet saved')
+
         else:
             print('duplicated tweet')
 
