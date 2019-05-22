@@ -11,7 +11,7 @@ from twython import TwythonStreamer
 from argparse import ArgumentParser
 from configuration import ConfigurationFile
 
-sys.path.append('annotationsite')
+# sys.path.append('annotationsite')
 os.environ['DJANGO_SETTINGS_MODULE'] = 'annotationsite.settings'
 import django
 django.setup()
