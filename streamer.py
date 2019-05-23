@@ -99,8 +99,7 @@ class TwitterStreamer(TwythonStreamer):
                 coordinates_lat = None
 
             ts = time.strftime('%Y-%m-%d %H:%M:%S',
-                               time.strptime(tweet['created_at'],
-                                             '%a %b %d %H:%M:%S {} %Y'.format(time.strftime('%z', time.gmtime()))))
+                               time.strptime(tweet['created_at'], '%a %b %d %H:%M:%S +0000 %Y'))
 
             tweet_obj = Tweet(id_str=tweet['id_str'], text=tweet['text'], created_at=ts,
                               favorite_count=tweet['favorite_count'], retweet_count=tweet['retweet_count'],
@@ -190,9 +189,15 @@ if __name__ == '__main__':
     config = ConfigurationFile(pargs.config)
 
     if pargs.mode == 'streaming':
-        stream = TwitterStreamer(config.twitter_consumer_key, config.twitter_consumer_secret, config.twitter_access_token,
-                                 config.twitter_access_secret, config.path_to_save_media_dir)
+        stream = TwitterStreamer(config.twitter_consumer_key, config.twitter_consumer_secret,
+                                 config.twitter_access_token, config.twitter_access_secret,
+                                 config.path_to_save_media_dir)
 
-        # Start the stream
-        stream.statuses.filter(track=config.query_track, follow=config.query_follow, locations=config.query_locations,
-                               delimited=config.query_delimited, stall_warnings=config.query_stall_warnings)
+        while True:
+            try:
+                # Start the stream
+                stream.statuses.filter(track=config.query_track, follow=config.query_follow,
+                                       locations=config.query_locations, delimited=config.query_delimited,
+                                       stall_warnings=config.query_stall_warnings)
+            except urllib3.exceptions.ProtocolError:
+                print('restarting streaming')
