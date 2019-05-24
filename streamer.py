@@ -199,5 +199,5 @@ if __name__ == '__main__':
                 stream.statuses.filter(track=config.query_track, follow=config.query_follow,
                                        locations=config.query_locations, delimited=config.query_delimited,
                                        stall_warnings=config.query_stall_warnings)
-            except urllib3.exceptions.ProtocolError:
-                print('restarting streaming')
+            except ConnectionResetError as re:
+                print(re)
