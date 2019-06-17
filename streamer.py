@@ -6,6 +6,7 @@ import sys
 import csv
 import urllib3
 import time
+from requests.exceptions import ReadTimeout, ConnectionError
 from twython import TwythonStreamer
 from argparse import ArgumentParser
 from configuration import ConfigurationFile
@@ -199,5 +200,6 @@ if __name__ == '__main__':
                 stream.statuses.filter(track=config.query_track, follow=config.query_follow,
                                        locations=config.query_locations, delimited=config.query_delimited,
                                        stall_warnings=config.query_stall_warnings)
-            except ConnectionResetError as re:
-                print(re)
+            except (ConnectionResetError, TimeoutError, ConnectionError) as e:
+                print(e)
+                time.sleep(60)
