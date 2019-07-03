@@ -6,7 +6,7 @@ import sys
 import csv
 import urllib3
 import time
-from requests.exceptions import ReadTimeout, ConnectionError
+from requests.exceptions import ConnectionError, ChunkedEncodingError
 from twython import TwythonStreamer
 from argparse import ArgumentParser
 from configuration import ConfigurationFile
@@ -190,16 +190,16 @@ if __name__ == '__main__':
     config = ConfigurationFile(pargs.config)
 
     if pargs.mode == 'streaming':
-        stream = TwitterStreamer(config.twitter_consumer_key, config.twitter_consumer_secret,
-                                 config.twitter_access_token, config.twitter_access_secret,
-                                 config.path_to_save_media_dir)
-
         while True:
             try:
+                stream = TwitterStreamer(config.twitter_consumer_key, config.twitter_consumer_secret,
+                                         config.twitter_access_token, config.twitter_access_secret,
+                                         config.path_to_save_media_dir)
+
                 # Start the stream
                 stream.statuses.filter(track=config.query_track, follow=config.query_follow,
                                        locations=config.query_locations, delimited=config.query_delimited,
                                        stall_warnings=config.query_stall_warnings)
-            except (ConnectionResetError, TimeoutError, ConnectionError) as e:
+            except (ConnectionResetError, TimeoutError, ConnectionError, ChunkedEncodingError) as e:
                 print(e)
                 time.sleep(60)
