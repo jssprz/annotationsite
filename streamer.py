@@ -194,8 +194,6 @@ if __name__ == '__main__':
 
     config = ConfigurationFile(pargs.config)
 
-    user_to_follow = list(PrioritizedUser.objects.value('user__screen_name').all())
-
     if pargs.mode == 'streaming':
         while True:
             try:
