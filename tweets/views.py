@@ -27,12 +27,19 @@ def cors_serve(request, path, document_root=None, show_indexes=False):
 def index(request):
     template = loader.get_template('index.html')
 
-    most_used_hashtags = list(Tweet.objects.values('hashtags').annotate(count=Count('id_str')).order_by('-count')[:10])
-    most_active_users = list(Tweet.objects.values('user__screen_name').annotate(count=Count('id_str')).order_by('-count')[:10])
-    most_used_media_types = list(TweetMedia.objects.values('type').annotate(count=Count('id_str')).order_by('-count'))
+    from datetime import datetime
+    from_date = datetime.strptime('2019-05-10 20:57:50', '%Y-%m-%d %H:%M:%S')
+    days_count = (datetime.now() - from_date).days
+
+    most_used_hashtags = list(Tweet.objects.values('hashtags').annotate(count=Count('id_str')).order_by('-count')[:13])
+    most_active_users = list(Tweet.objects.values('user__screen_name').annotate(count=Count('id_str')).order_by('-count')[:12])
+    used_languages = Tweet.objects.values('lang').annotate(count=Count('id_str'))
+    used_locations = Tweet.objects.values('location').annotate(count=Count('id_str'))
+    # most_used_media_types = list(TweetMedia.objects.values('type').annotate(count=Count('id_str')).order_by('-count'))
 
     context = {
         'statistics': {
+            'days_count': days_count,
             'tweets_count': len(Tweet.objects.all()),
             'medias_count': len(TweetMedia.objects.all()),
             'memes_count': len(TweetMedia.objects.filter(is_meme=True).all()),
@@ -40,9 +47,13 @@ def index(request):
             'not_classified_count': len(TweetMedia.objects.filter(is_meme=None).all()),
             'users_count': len(TweetUser.objects.all()),
             'hashtags_count': len(TweetHashTag.objects.all()),
-            'most_used_media_types': most_used_media_types,
+            # 'most_used_media_types': most_used_media_types,
             'most_used_hashtags': most_used_hashtags[1:],
             'most_active_users': most_active_users,
+            'languages_count': len(used_languages),
+            'most_used_languages': list(used_languages.order_by('-count')[:12]),
+            'locations_count': len(used_locations),
+            'most_used_locations': list(used_locations.order_by('-count')[:12])
         }
     }
     return HttpResponse(template.render(context, request))

@@ -1,8 +1,9 @@
 {% if statistics %}
     <ul>
-        <li>Cantidad de tweets: {{statistics.tweets_count}}</li>
+        <li>Tiempo: {{statistics.days_count}} días</li>
+        <li>Cantidad de tweets: {{statistics.tweets_count}} ({% widthratio statistics.tweets_count statistics.days_count 1 %} diarios)</li>
         <li>
-            Cantidad de imágenes: {{statistics.medias_count}}
+            Cantidad de imágenes: {{statistics.medias_count}} ({% widthratio statistics.medias_count statistics.days_count 1 %} diarias)
             <ul>
                 <li>Datos de la clasificación manual:
                     <ul>
@@ -34,7 +35,23 @@
         <li>Hashtags más usados:
             <ul>
             {% for ht in statistics.most_used_hashtags %}
-                <li>#{{ht.hashtags}}: {{ht.count}}</li>
+                <li>#{{ht.hashtags}}: {{ht.count}} ({% widthratio ht.count statistics.days_count 1 %} diarios)</li>
+            {% endfor %}
+            </ul>
+        </li>
+        <li>Cantidad de lenguajes: {{statistics.languages_count}}</li>
+        <li>Lenguages más usados:
+            <ul>
+            {% for l in statistics.most_used_languages %}
+                <li>{{l.lang}}: {{l.count}}</li>
+            {% endfor %}
+            </ul>
+        </li>
+        <li>Cantidad de lugares: {{statistics.locations_count}}</li>
+        <li>Lugares más activos:
+            <ul>
+            {% for l in statistics.most_used_locations %}
+                <li>{{l.location}}: {{l.count}}</li>
             {% endfor %}
             </ul>
         </li>
