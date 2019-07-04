@@ -100,3 +100,29 @@ class Tweet(models.Model):
 
     def __str__(self):
         return self.id_str
+
+
+class ReportedUser(models.Model):
+    user = models.ForeignKey(TweetUser, on_delete=models.CASCADE)
+    reason = models.CharField(max_length=200, null=True, blank=True)
+
+    def __str__(self):
+        return str(self.user)
+
+    class Meta:
+        verbose_name = 'Usuario reportado'
+        verbose_name_plural = 'Usuarios reportados'
+        ordering = ['user']
+
+
+class PrioritizedUser(models.Model):
+    user = models.ForeignKey(TweetUser, on_delete=models.CASCADE)
+    reason = models.CharField(max_length=200, null=True, blank=True)
+
+    def __str__(self):
+        return str(self.user)
+
+    class Meta:
+        verbose_name = 'Usuario priorizado'
+        verbose_name_plural = 'Usuarios priorizados'
+        ordering = ['user']

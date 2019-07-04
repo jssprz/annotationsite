@@ -4,6 +4,8 @@ from .models import Tweet
 from .models import TweetMedia
 from .models import TweetHashTag
 from .models import TweetUser
+from .models import ReportedUser
+from .models import PrioritizedUser
 
 
 class TweetMediaInlines(admin.TabularInline):
@@ -54,7 +56,22 @@ class TweetUserAdmin(admin.ModelAdmin):
     ordering = ('screen_name',)
 
 
+class ReportedUserAdmin(admin.ModelAdmin):
+    list_display = ('user', 'reason',)
+
+    ordering = ('user',)
+
+
+class PrioritizedUserAdmin(admin.ModelAdmin):
+    list_display = ('user', 'reason',)
+
+    ordering = ('user',)
+
+
 admin.site.register(Tweet, TweetAdmin)
 admin.site.register(TweetMedia, TweetMediaAdmin)
 admin.site.register(TweetHashTag)
 admin.site.register(TweetUser, TweetUserAdmin)
+admin.site.register(ReportedUser, ReportedUserAdmin)
+admin.site.register(PrioritizedUser, PrioritizedUserAdmin)
+admin.site.site_header = 'Visual-Framing Administration'
