@@ -140,7 +140,7 @@ class TwitterStreamer(TwythonStreamer):
         if 'entities' not in tweet or 'media' not in tweet['entities']:
             print('Tweet blocked: tweet without image')
             return False
-        if ReportedUser.objects.filter(id_str=tweet['user']['id_str']).exists():
+        if ReportedUser.objects.filter(user__id_str=tweet['user']['id_str']).exists():
             print('Tweet blocked: ({}, {}) is a reported user'.format(tweet['user']['id_str'], tweet['user']['screen_name']))
             return False
 
@@ -193,6 +193,8 @@ if __name__ == '__main__':
     pargs = parser.parse_args()
 
     config = ConfigurationFile(pargs.config)
+
+    user_to_follow = list(PrioritizedUser.objects.value('user__screen_name').all())
 
     if pargs.mode == 'streaming':
         while True:
