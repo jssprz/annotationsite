@@ -139,7 +139,7 @@ class TwitterStreamer(TwythonStreamer):
         :return:
         """
 
-        return 'media' in tweet['entities']
+        return 'entities' in tweet and 'media' in tweet['entities']
 
     def process_tweet(self, tweet):
         """
@@ -192,14 +192,14 @@ if __name__ == '__main__':
     if pargs.mode == 'streaming':
         while True:
             try:
-                stream = TwitterStreamer(config.twitter_consumer_key, config.twitter_consumer_secret,
-                                         config.twitter_access_token, config.twitter_access_secret,
-                                         config.path_to_save_media_dir)
+                streamer = TwitterStreamer(config.twitter_consumer_key, config.twitter_consumer_secret,
+                                           config.twitter_access_token, config.twitter_access_secret,
+                                           config.path_to_save_media_dir)
 
                 # Start the stream
-                stream.statuses.filter(track=config.query_track, follow=config.query_follow,
-                                       locations=config.query_locations, delimited=config.query_delimited,
-                                       stall_warnings=config.query_stall_warnings)
+                streamer.statuses.filter(track=config.query_track, follow=config.query_follow,
+                                         locations=config.query_locations, delimited=config.query_delimited,
+                                         stall_warnings=config.query_stall_warnings)
             except (ConnectionResetError, TimeoutError, ConnectionError, ChunkedEncodingError) as e:
                 print(e)
                 time.sleep(60)
