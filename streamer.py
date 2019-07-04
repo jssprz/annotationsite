@@ -16,7 +16,7 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'annotationsite.settings'
 import django
 django.setup()
 
-from tweets.models import Tweet, TweetMedia, TweetUser, TweetHashTag
+from tweets.models import Tweet, TweetMedia, TweetUser, TweetHashTag, ReportedUser, PrioritizedUser
 
 __author__ = "jssprz"
 __version__ = "0.0.1"
@@ -46,7 +46,6 @@ class TwitterStreamer(TwythonStreamer):
         :param process_tweet_fn: function to process the data
         :return:
         """
-        # Only collect tweets in English
         if self.filter_tweet(data):
             # tweet_data = self.process_tweet(data)
             self.save_to_model(data)
@@ -128,7 +127,6 @@ class TwitterStreamer(TwythonStreamer):
             tweet_obj.hashtags.set(hashtags_objs)
             tweet_obj.medias.set(media_objs)
             print('tweet saved')
-
         else:
             print('duplicated tweet')
 
@@ -139,7 +137,14 @@ class TwitterStreamer(TwythonStreamer):
         :return:
         """
 
-        return 'entities' in tweet and 'media' in tweet['entities']
+        if 'entities' not in tweet or 'media' not in tweet['entities']:
+            print('Tweet blocked: tweet without image')
+            return False
+        if ReportedUser.objects.filter(id_str=tweet['user']['id_str']).exists():
+            print('Tweet blocked: ({}, {}) is a reported user'.format(tweet['user']['id_str'], tweet['user']['screen_name']))
+            return False
+
+        return True
 
     def process_tweet(self, tweet):
         """
