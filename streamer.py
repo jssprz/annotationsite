@@ -207,5 +207,5 @@ if __name__ == '__main__':
                                          locations=config.query_locations, delimited=config.query_delimited,
                                          stall_warnings=config.query_stall_warnings)
             except (ConnectionResetError, TimeoutError, ConnectionError, ChunkedEncodingError, OperationalError) as e:
-                print('Restarting straming after {}'.format(e))
+                print('Restarting streaming after {}'.format(e))
                 time.sleep(60)
