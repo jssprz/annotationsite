@@ -48,7 +48,7 @@ def find_and_remove_duplicated():
             # TweetMedia.delete()
             dups[file_hash].append(path)
         else:
-            dups[file_hash] = path
+            dups[file_hash] = [path]
     return dups
 
 
