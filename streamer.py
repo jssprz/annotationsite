@@ -14,6 +14,7 @@ from configuration import ConfigurationFile
 # sys.path.append('annotationsite')
 os.environ['DJANGO_SETTINGS_MODULE'] = 'annotationsite.settings'
 import django
+from django.db.utils import OperationalError
 django.setup()
 
 from tweets.models import Tweet, TweetMedia, TweetUser, TweetHashTag, ReportedUser, PrioritizedUser
@@ -205,6 +206,6 @@ if __name__ == '__main__':
                 streamer.statuses.filter(track=config.query_track, follow=config.query_follow,
                                          locations=config.query_locations, delimited=config.query_delimited,
                                          stall_warnings=config.query_stall_warnings)
-            except (ConnectionResetError, TimeoutError, ConnectionError, ChunkedEncodingError) as e:
-                print(e)
+            except (ConnectionResetError, TimeoutError, ConnectionError, ChunkedEncodingError, OperationalError) as e:
+                print('Restarting straming after {}'.format(e))
                 time.sleep(60)
