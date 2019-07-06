@@ -7,6 +7,7 @@ from .models import TweetUser
 from .models import ReportedUser
 from .models import PrioritizedUser
 from .models import Annotation
+from .models import Target
 
 class TweetMediaInline(admin.TabularInline):
     model = Tweet.medias.through
@@ -77,10 +78,17 @@ class PrioritizedUserAdmin(admin.ModelAdmin):
     ordering = ('user',)
 
 
+class TargetAdmin(admin.ModelAdmin):
+    list_display = ('name', 'description',)
+
+    ordering = ('name',)
+
+
 admin.site.register(Tweet, TweetAdmin)
 admin.site.register(TweetMedia, TweetMediaAdmin)
 admin.site.register(TweetHashTag)
 admin.site.register(TweetUser, TweetUserAdmin)
 admin.site.register(ReportedUser, ReportedUserAdmin)
 admin.site.register(PrioritizedUser, PrioritizedUserAdmin)
+admin.site.register(Target, TargetAdmin)
 admin.site.site_header = 'Visual-Framing Administration'

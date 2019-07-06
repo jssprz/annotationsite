@@ -86,8 +86,8 @@ class Target(models.Model):
         return self.name
 
     class Meta:
-        verbose_name = 'Target'
-        verbose_name_plural = 'Targets de imágenes de tweet'
+        verbose_name = 'Etiqueta'
+        verbose_name_plural = 'Etiquetas para las imágenes'
         ordering = ['name']
 
 
