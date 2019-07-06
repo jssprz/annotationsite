@@ -1,10 +1,11 @@
-from django.shortcuts import render
+import json
+from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponse
 from django.template import loader
 from django.views.static import serve as static_serve
 from django.db.models import Count
+from django.contrib.auth import get_user_model
 from .models import Tweet, TweetMedia, TweetUser, TweetHashTag, Annotation, Target
-from .forms import TaggerForm
 
 
 def cors_serve(request, path, document_root=None, show_indexes=False):
@@ -69,7 +70,6 @@ def statistics(request):
 
 def tagger(request):
     template = loader.get_template('tagger.html')
-    contex = {}
 
     if request.user.is_authenticated:
         # apply the following filters to images
@@ -85,10 +85,39 @@ def tagger(request):
     else:
         medias = TweetMedia.objects.filter(id__gt=50000).filter(id__lte=60000).all()
 
-    targets = Target.objects.all()
-
-    # tweet_media = TweetMedia.objects.get(id_str='1136070674152378368')
-    # form = TaggerForm(instance=tweet_media)
-
-    contex = {'forms': None, 'medias': medias[:100], 'options': targets}
+    contex = {'medias': medias[:100], 'options': Target.objects.all()}
     return HttpResponse(template.render(contex, request))
+
+
+def annotate(request, media_id_str):
+    media = get_object_or_404(TweetMedia, id_str=media_id_str)
+    if request.user.is_authenticated:
+        try:
+            print('selected target {}'.format(request.POST['target']))
+            selected_target = Target.objects.get(pk=request.POST['target'])
+        except (KeyError, Target.DoesNotExist):
+            print('target {} unknown'.format(request.POST['target']))
+            # Redisplay the question voting form.
+            return render(request, 'tweets/error.html', {
+                'media': media,
+                'error_message': "You didn't select a choice.",
+            })
+        else:
+            response_data = {}
+            if not Annotation.objects.filter(media=media, created_by=request.user).exists():
+                annotation = Annotation(media=media, created_by=request.user, target=selected_target)
+                print('new annotation ({}) of media {} by {} register'.format(selected_target.name, media_id_str, request.user.username))
+                response_data['result'] = 'new annotation ({}) of media {} by {} register'.format(selected_target.name, media_id_str, request.user.username)
+            else:
+                annotation = Annotation.objects.get(media=media, created_by=request.user)
+                annotation.target = selected_target
+                print('annotation ({}) of {} by {} modified'.format(selected_target.name, media_id_str, request.user.username))
+                response_data['result'] = 'annotation ({}) of {} by {} modified'.format(selected_target.name, media_id_str, request.user.username)
+            annotation.save()
+            print('annotation saved')
+            return HttpResponse(
+                json.dumps(response_data),
+                content_type="application/json"
+            )
+    else:
+        pass

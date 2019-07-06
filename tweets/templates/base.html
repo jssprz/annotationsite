@@ -9,6 +9,10 @@
     {# Load CSS and JavaScript #}
     {% bootstrap_css %}
     {% bootstrap_javascript jquery='full' %}
+
+    {# Load my CSS and JavaScript files #}
+    {% block my_css_js %}
+    {% endblock %}
 </head>
 <body>
   <main>

@@ -5,5 +5,6 @@ from . import views
 urlpatterns = [
     path('', views.index, name='index'),
     path('statistics', views.statistics, name='statistics'),
-    path('tagger', views.tagger, name='tagger')
+    path('tagger', views.tagger, name='tagger'),
+    path('<str:media_id_str>/annotate', views.annotate, name='annotate')
 ]

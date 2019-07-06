@@ -2,6 +2,14 @@
 
 {% block title %}Tagger{% endblock %}
 
+{% block my_css_js %}
+{% load static %}
+<script src="{% static 'js/tagger.js' %}" type="text/javascript"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.2.2/jquery.form.min.js" integrity="sha384-FzT3vTVGXqf7wRfy8k4BiyzvbNfeYjK+frTVqZeNDFl8woCbF0CYG6g2fMEFFo/i" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+<script src="http://malsup.github.com/jquery.form.js"></script>
+{% endblock %}
+
 {% block content %}
 {% if user.is_authenticated %}
   Hi {{ user.username }}!
@@ -15,14 +23,15 @@
     <div class="carousel-inner">
     {% for m in medias %}
       <div class="carousel-item {{ forloop.counter0|yesno:',active,' }}">
-        <form id="{{ m.id_str }}" action="" method="post">
+        <form id="{{ m.id_str }}" action="{% url 'annotate' m.id_str %}" method="post">
+            {% csrf_token %}
             <div class="card">
               <img src="{{ m.local_image.url }}" class="d-block w-100">
                 <div class="card-body d-flex justify-content-center">
                   {% for o in options %}
                     <div class="form-check-inline">
                       <label class="form-check-label">
-                        <input type="radio" class="form-check-input" name="optradio">{{ o.name }}
+                        <input id="target{{ forloop.counter }}" name="target" type="radio" class="form-check-input" value="{{ o.name }}">{{ o.name }}
                       </label>
                     </div>
                   {% endfor %}

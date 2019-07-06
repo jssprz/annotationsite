@@ -124,12 +124,16 @@ USE_TZ = True
 BASE_ROOT = ''
 
 STATIC_URL = '/{}static/'.format(BASE_ROOT)
-STATIC_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'annotationsite/static')
+STATIC_ROOT = ''
+
+STATICFILES_DIRS = [
+    os.path.join(os.path.dirname(BASE_DIR), 'annotationsite/static')
+]
 
 # directory where media content is to be stored
 MEDIA_URL = '/{}media/'.format(BASE_ROOT)
 MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'annotationsite/media')
 
 # url to redirect users after logging
-LOGIN_REDIRECT_URL = '/tagger'
-LOGOUT_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/{}tagger'.format(BASE_ROOT)
+LOGOUT_REDIRECT_URL = '/{}'.format(BASE_ROOT)
