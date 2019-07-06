@@ -1,0 +1,61 @@
+{% if statistics %}
+    <ul>
+        <li>Tiempo: {{statistics.days_count}} días</li>
+        <li>Cantidad de tweets: {{statistics.tweets_count}} ({% widthratio statistics.tweets_count statistics.days_count 1 %} diarios)</li>
+        <li>
+            Cantidad de imágenes: {{statistics.medias_count}} ({% widthratio statistics.medias_count statistics.days_count 1 %} diarias)
+<!--            <ul>-->
+<!--                <li>Datos de la clasificación manual:-->
+<!--                    <ul>-->
+<!--                        <li>memes: {{statistics.memes_count}}</li>-->
+<!--                        <li>no-memes: {{statistics.noise_count}}</li>-->
+<!--                        <li>sin clasificar: {{statistics.not_classified_count}}</li>-->
+<!--                    </ul>-->
+<!--                </li>-->
+<!--                &lt;!&ndash;-->
+<!--                <li>Tipos de media mas usados:-->
+<!--                    <ul>-->
+<!--                        {% for t in statistics.most_used_media_types %}-->
+<!--                            <li>{{t.type}}: {{t.count}}</li>-->
+<!--                        {% endfor %}-->
+<!--                    </ul>-->
+<!--                </li>-->
+<!--                &ndash;&gt;-->
+<!--            </ul>-->
+        </li>
+        <li>Cantidad de usarios: {{statistics.users_count}}</li>
+        <li>Usuarios más activos:
+            <ul>
+            {% for u in statistics.most_active_users %}
+                <li>@{{u.user__screen_name}}: {{u.count}}</li>
+            {% endfor %}
+            </ul>
+        </li>
+        <li>Cantidad de hashtags: {{statistics.hashtags_count}}</li>
+        <li>Hashtags más usados:
+            <ul>
+            {% for ht in statistics.most_used_hashtags %}
+                <li>#{{ht.hashtags}}: {{ht.count}} ({% widthratio ht.count statistics.days_count 1 %} diarios)</li>
+            {% endfor %}
+            </ul>
+        </li>
+        <li>Cantidad de lenguajes: {{statistics.languages_count}}</li>
+        <li>Lenguajes más usados:
+            <ul>
+            {% for l in statistics.most_used_languages %}
+                <li>{{l.lang}}: {{l.count}}</li>
+            {% endfor %}
+            </ul>
+        </li>
+        <li>Cantidad de lugares: {{statistics.locations_count}}</li>
+        <li>Lugares más activos:
+            <ul>
+            {% for l in statistics.most_used_locations %}
+                <li>{{l.location}}: {{l.count}}</li>
+            {% endfor %}
+            </ul>
+        </li>
+    </ul>
+{% else %}
+    <p>No hay estadísticas disponibles.</p>
+{% endif %}
