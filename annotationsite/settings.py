@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'bootstrap4'
 ]
 
 MIDDLEWARE = [
@@ -128,3 +129,7 @@ STATIC_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'annotationsite/static')
 # directory where media content is to be stored
 MEDIA_URL = '/{}media/'.format(BASE_ROOT)
 MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'annotationsite/media')
+
+# url to redirect users after logging
+LOGIN_REDIRECT_URL = '/tagger'
+LOGOUT_REDIRECT_URL = '/'

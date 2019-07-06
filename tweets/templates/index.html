@@ -1,4 +1,10 @@
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
 {% if welcome_msg %}
     <h1>{{welcome_msg}}</h1>
 {% endif %}
 <h2>Las estadísticas se muestran <a href="/statistics">aquí</a></h2>
+{% endblock %}

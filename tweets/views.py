@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.template import loader
 from django.views.static import serve as static_serve
 from django.db.models import Count
-from .models import Tweet, TweetMedia, TweetUser, TweetHashTag
+from .models import Tweet, TweetMedia, TweetUser, TweetHashTag, Annotation, Target
 from .forms import TaggerForm
 
 
@@ -69,14 +69,26 @@ def statistics(request):
 
 def tagger(request):
     template = loader.get_template('tagger.html')
+    contex = {}
 
-    # apply the following filters to images
-    # - first month
-    # - less than 10 annotations
-    # - current user has never annotated
+    if request.user.is_authenticated:
+        # apply the following filters to images
+        # - first month (first 50000)
+        # - less than 10 annotations
+        # - current user has never annotated
+        user_annotated_medias_ids = Annotation.objects.filter(created_by=request.user).values_list('media_id', flat=True)
+        full_annotated_medias_ids = Annotation.objects.annotate(num_per_media=Count('media')).filter(num_per_media__lt=10).values_list('media_id', flat=True)
+        excluded_medias_ids = list(user_annotated_medias_ids) + list(full_annotated_medias_ids)
+        print(excluded_medias_ids)
+        medias = TweetMedia.objects.filter(id__lte=50000).exclude(id__in=excluded_medias_ids).all()
+        print(len(medias))
+    else:
+        medias = TweetMedia.objects.filter(id__gt=50000).filter(id__lte=60000).all()
 
-    tweet_media = TweetMedia.objects.get(pk=1)
-    form = TaggerForm(instance=tweet_media)
+    targets = Target.objects.all()
 
-    contex = {'form': None}
+    # tweet_media = TweetMedia.objects.get(id_str='1136070674152378368')
+    # form = TaggerForm(instance=tweet_media)
+
+    contex = {'forms': None, 'medias': medias[:100], 'options': targets}
     return HttpResponse(template.render(contex, request))
