@@ -41,7 +41,6 @@ class TweetMedia(models.Model):
     media_url_https = models.URLField()
     local_image = models.ImageField(upload_to='tweet_medias', verbose_name='local_url', max_length=256)
     type = models.CharField(max_length=50)
-    is_meme = models.BooleanField(null=True)
 
     def image_tag(self):
         return mark_safe('<img src="%s" width="150" height="150" />' % self.local_image.url)
@@ -77,6 +76,45 @@ class TweetMedia(models.Model):
         verbose_name = 'Imagen de tweet'
         verbose_name_plural = 'Imágenes de los tweets'
         ordering = ['id_str']
+
+
+class Target(models.Model):
+    MEME = 'MEME'
+    NOT_MEME = 'NOT_MEME'
+    FUZZY = 'FUZZY'
+    TARGET_CHOICES = [
+        (MEME, 'meme'),
+        (NOT_MEME, 'no-meme'),
+        (FUZZY, 'dudoso'),
+
+    ]
+    name = models.CharField(max_length=10, choices=TARGET_CHOICES, primary_key=True)
+    description = models.CharField(max_length=250, null=True)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = 'Target'
+        verbose_name_plural = 'Targets de imágenes de tweet'
+        ordering = ['name']
+
+
+class Annotation(models.Model):
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+    )
+    media = models.ForeignKey(TweetMedia, on_delete=models.CASCADE, related_name='annotations')
+    target = models.ForeignKey(Target, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return '{} - {}'.format(self.media, self.target)
+
+    class Meta:
+        verbose_name = 'Anotación'
+        verbose_name_plural = 'Anotaciones'
+        ordering = ['media']
 
 
 class Tweet(models.Model):

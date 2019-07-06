@@ -6,9 +6,9 @@ from .models import TweetHashTag
 from .models import TweetUser
 from .models import ReportedUser
 from .models import PrioritizedUser
+from .models import Annotation
 
-
-class TweetMediaInlines(admin.TabularInline):
+class TweetMediaInline(admin.TabularInline):
     model = Tweet.medias.through
 
     # readonly_fields = ('image_tag',)
@@ -23,24 +23,33 @@ class TweetMediaInlines(admin.TabularInline):
     extra = 0
 
 
+class AnnotationInline(admin.TabularInline):
+    model = Annotation
+    can_delete = False  # disable deletion of annotations
+    show_change_link = False  # modification/edit link
+    extra = 0
+
+
 class TweetAdmin(admin.ModelAdmin):
     list_display = ('id_str', 'user', 'text', 'images_tags')
     list_filter = ('user', 'hashtags',)
 
     list_per_page = 30
 
-    inlines = (TweetMediaInlines,)
+    inlines = (TweetMediaInline,)
 
 
 class TweetMediaAdmin(admin.ModelAdmin):
-    list_display = ('id_str', 'url', 'get_users', 'image_tag', 'is_meme',)
-    list_filter = ('is_meme',)
+    list_display = ('id_str', 'url', 'get_users', 'image_tag',)
+    #list_filter = ('target',)
 
-    list_editable = ('is_meme',)
+    #list_editable = ('target',)
 
     list_per_page = 20
 
     readonly_fields = ('image_tag',)
+
+    inlines = (AnnotationInline,)
 
     def get_users(self, obj):
         return [', '.join([t.user.screen_name for t in obj.tweets.all()])]
