@@ -79,16 +79,7 @@ class TweetMedia(models.Model):
 
 
 class Target(models.Model):
-    MEME = 'MEME'
-    NOT_MEME = 'NOT_MEME'
-    FUZZY = 'FUZZY'
-    TARGET_CHOICES = [
-        (MEME, 'meme'),
-        (NOT_MEME, 'no-meme'),
-        (FUZZY, 'dudoso'),
-
-    ]
-    name = models.CharField(max_length=10, choices=TARGET_CHOICES, primary_key=True)
+    name = models.CharField(max_length=10, primary_key=True)
     description = models.CharField(max_length=250, null=True)
 
     def __str__(self):
