@@ -6,7 +6,7 @@
 {% if user.is_authenticated %}
   Hi {{ user.username }}!
   <p><a href="{% url 'logout' %}">logout</a></p>
-  <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
+  <div id="carouselExampleIndicators" class="carousel slide mx-auto" data-ride="carousel" style="width: 50rem;">
     <ol class="carousel-indicators">
       {% for m in medias %}
         <li data-target="#carouselExampleIndicators" data-slide-to="{{ forloop.counter0 }}" class="{{ forloop.counter0|yesno:',active,' }}"></li>
@@ -16,14 +16,18 @@
     {% for m in medias %}
       <div class="carousel-item {{ forloop.counter0|yesno:',active,' }}">
         <form id="{{ m.id_str }}" action="" method="post">
-          <img src="{{ m.local_image.url }}" class="d-block w-100">
-          {% for o in options %}
-            <div class="form-check-inline">
-              <label class="form-check-label">
-                <input type="radio" class="form-check-input" name="optradio">{{ o.name }}
-              </label>
+            <div class="card">
+              <img src="{{ m.local_image.url }}" class="d-block w-100">
+                <div class="card-body">
+                  {% for o in options %}
+                    <div class="form-check-inline">
+                      <label class="form-check-label">
+                        <input type="radio" class="form-check-input" name="optradio">{{ o.name }}
+                      </label>
+                    </div>
+                  {% endfor %}
+                </div>
             </div>
-          {% endfor %}
         </form>
       </div>
     {% endfor %}
@@ -36,6 +40,7 @@
       <span class="carousel-control-next-icon" aria-hidden="true"></span>
       <span class="sr-only">Next</span>
     </a>
+  </div>
 {% else %}
   <p>You are not logged in</p>
   <a href="{% url 'login' %}">login</a>
