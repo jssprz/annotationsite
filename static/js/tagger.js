@@ -16,13 +16,13 @@ $(document).ready(function() {
                 indicator.removeClass('yes');
                 indicator.removeClass('no');
                 indicator.removeClass('maybe');
-                if(target == 'Meme'){
+                if(target == '1'){
                     indicator.addClass('yes')
                 }
-                else if(target == 'No-meme'){
+                else if(target == '2'){
                     indicator.addClass('no')
                 }
-                else if(target == 'Dudoso'){
+                else if(target == '3'){
                     indicator.addClass('maybe')
                 }
             }
