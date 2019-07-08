@@ -37,7 +37,7 @@
                       {% for o in options %}
                         <div class="form-check-inline">
                           <label class="form-check-label">
-                            <input id="target{{ forloop.counter }}" name="target" type="radio" class="form-check-input" value="{{ o.name }}">{{ o.name }}
+                            <input id="target{{ forloop.counter }}" name="target" type="radio" class="form-check-input" value="{{ o.id }}">{{ o.name }}
                           </label>
                         </div>
                       {% endfor %}
@@ -63,33 +63,5 @@
 {% else %}
     <p>Esta funcionalidad es solo para usuarios registrados</p>
     <a href="{% url 'login' %}">login</a>
-    <!-- Button trigger modal -->
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#login-modal">
-      Login
-    </button>
-
-    <!-- Modal -->
-    <div class="modal fade" id="login-modal" tabindex="-1" role="dialog" aria-labelledby="modal-label" aria-hidden="true">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <form method="post">
-              <div class="modal-header">
-                <h5 class="modal-title" id="modal-label">Login</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div class="modal-body">
-                  {% csrf_token %}
-                  {{ form.as_p }}
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" type="submit">Login</button>
-              </div>
-            </form>
-        </div>
-      </div>
-    </div>
 {% endif %}
 {% endblock %}
