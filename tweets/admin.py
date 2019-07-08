@@ -6,7 +6,7 @@ from .models import TweetHashTag
 from .models import TweetUser
 from .models import ReportedUser
 from .models import PrioritizedUser
-# from .models import Annotation
+from .models import Annotation
 from .models import Target
 
 
@@ -25,11 +25,11 @@ class TweetMediaInline(admin.TabularInline):
     extra = 0
 
 
-# class AnnotationInline(admin.TabularInline):
-#     model = Annotation
-#     can_delete = False  # disable deletion of annotations
-#     show_change_link = False  # modification/edit link
-#     extra = 0
+class AnnotationInline(admin.TabularInline):
+    model = Annotation
+    can_delete = False  # disable deletion of annotations
+    show_change_link = False  # modification/edit link
+    extra = 0
 
 
 class TweetAdmin(admin.ModelAdmin):
@@ -51,7 +51,7 @@ class TweetMediaAdmin(admin.ModelAdmin):
 
     readonly_fields = ('image_tag',)
 
-    # inlines = (AnnotationInline,)
+    inlines = (AnnotationInline,)
 
     def get_users(self, obj):
         return [', '.join([t.user.screen_name for t in obj.tweets.all()])]
@@ -86,8 +86,8 @@ class TargetAdmin(admin.ModelAdmin):
 
 
 class AnnotationAdmin(admin.ModelAdmin):
-    list_display = ('created_by', 'media', 'get_image_tag',)
-    list_filter = ('created_by', )
+    list_display = ('created_by', 'target', 'media', 'get_image_tag',)
+    list_filter = ('created_by', 'target', )
 
     ordering = ('created_by',)
 
@@ -105,5 +105,5 @@ admin.site.register(TweetUser, TweetUserAdmin)
 admin.site.register(ReportedUser, ReportedUserAdmin)
 admin.site.register(PrioritizedUser, PrioritizedUserAdmin)
 admin.site.register(Target, TargetAdmin)
-# admin.site.register(Annotation, AnnotationAdmin)
+admin.site.register(Annotation, AnnotationAdmin)
 admin.site.site_header = 'Visual-Framing Administration'
