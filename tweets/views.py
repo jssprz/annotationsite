@@ -5,7 +5,7 @@ from django.template import loader
 from django.views.static import serve as static_serve
 from django.db.models import Count
 from django.contrib.auth import get_user_model
-from .models import Tweet, TweetMedia, TweetUser, TweetHashTag, Annotation, Target
+from .models import Tweet, TweetMedia, TweetUser, TweetHashTag, Target
 
 
 def cors_serve(request, path, document_root=None, show_indexes=False):
@@ -71,23 +71,23 @@ def statistics(request):
 def tagger(request):
     template = loader.get_template('tagger.html')
 
-    if request.user.is_authenticated:
-        # apply the following filters to images
-        # - first month (first 50000)
-        # - less than 10 annotations
-        # - current user has never annotated
-        user_annotated_medias_ids = Annotation.objects.filter(created_by=request.user).values_list('media_id', flat=True)
-        full_annotated_medias_ids = Annotation.objects.annotate(num_per_media=Count('media')).filter(num_per_media__lt=10).values_list('media_id', flat=True)
-        excluded_medias_ids = list(user_annotated_medias_ids) + list(full_annotated_medias_ids)
-        print(excluded_medias_ids)
-        medias = TweetMedia.objects.filter(id__lte=50000).exclude(id__in=excluded_medias_ids).all()
-        print(len(medias))
-    else:
-        # medias = TweetMedia.objects.filter(id__gt=50000).filter(id__lte=60000).all()
-        response = redirect('/accounts/login/')
-        return response
+    # if request.user.is_authenticated:
+    #     # apply the following filters to images
+    #     # - first month (first 50000)
+    #     # - less than 10 annotations
+    #     # - current user has never annotated
+    #     user_annotated_medias_ids = Annotation.objects.filter(created_by=request.user).values_list('media_id', flat=True)
+    #     full_annotated_medias_ids = Annotation.objects.annotate(num_per_media=Count('media')).filter(num_per_media__lt=10).values_list('media_id', flat=True)
+    #     excluded_medias_ids = list(user_annotated_medias_ids) + list(full_annotated_medias_ids)
+    #     print(excluded_medias_ids)
+    #     medias = TweetMedia.objects.filter(id__lte=50000).exclude(id__in=excluded_medias_ids).all()
+    #     print(len(medias))
+    # else:
+    #     # medias = TweetMedia.objects.filter(id__gt=50000).filter(id__lte=60000).all()
+    #     response = redirect('/accounts/login/')
+    #     return response
 
-    contex = {'medias': medias[:25], 'options': Target.objects.all()}
+    contex = {'options': Target.objects.all()}
     return HttpResponse(template.render(contex, request))
 
 
