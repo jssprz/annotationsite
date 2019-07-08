@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from django.template import loader
 from django.views.static import serve as static_serve
 from django.db.models import Count
-from django.contrib.auth import get_user_model
+from django.urls import reverse
 from .models import Tweet, TweetMedia, TweetUser, TweetHashTag, Annotation, Target
 
 
@@ -84,7 +84,10 @@ def tagger(request):
         print(len(medias))
     else:
         # medias = TweetMedia.objects.filter(id__gt=50000).filter(id__lte=60000).all()
-        response = redirect('/accounts/login/')
+        base_url = reverse('index')
+        login_url = '{}/accounts/login/'.format(base_url)
+        print('redirectig to {}'.format(login_url))
+        response = redirect(login_url)
         return response
 
     contex = {'medias': medias[:25], 'options': Target.objects.all()}
