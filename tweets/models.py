@@ -79,7 +79,7 @@ class TweetMedia(models.Model):
 
 
 class Target(models.Model):
-    name = models.CharField(max_length=10)
+    name = models.CharField(max_length=10, primary_key=True)
     description = models.CharField(max_length=250, null=True)
 
     def __str__(self):
