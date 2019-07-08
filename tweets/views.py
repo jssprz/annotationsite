@@ -85,7 +85,7 @@ def tagger(request):
     else:
         # medias = TweetMedia.objects.filter(id__gt=50000).filter(id__lte=60000).all()
         base_url = reverse('index')
-        login_url = '{}/accounts/login/'.format(base_url)
+        login_url = '{}accounts/login/'.format(base_url)
         print('redirectig to {}'.format(login_url))
         response = redirect(login_url)
         return response
