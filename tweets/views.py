@@ -1,5 +1,5 @@
 import json
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpResponse
 from django.template import loader
 from django.views.static import serve as static_serve
@@ -83,9 +83,11 @@ def tagger(request):
         medias = TweetMedia.objects.filter(id__lte=50000).exclude(id__in=excluded_medias_ids).all()
         print(len(medias))
     else:
-        medias = TweetMedia.objects.filter(id__gt=50000).filter(id__lte=60000).all()
+        # medias = TweetMedia.objects.filter(id__gt=50000).filter(id__lte=60000).all()
+        response = redirect('/accounts/login/')
+        return response
 
-    contex = {'medias': medias[:100], 'options': Target.objects.all()}
+    contex = {'medias': medias[:25], 'options': Target.objects.all()}
     return HttpResponse(template.render(contex, request))
 
 
@@ -107,12 +109,14 @@ def annotate(request, media_id_str):
             if not Annotation.objects.filter(media=media, created_by=request.user).exists():
                 annotation = Annotation(media=media, created_by=request.user, target=selected_target)
                 print('new annotation ({}) of media {} by {} register'.format(selected_target.name, media_id_str, request.user.username))
-                response_data['result'] = 'new annotation ({}) of media {} by {} register'.format(selected_target.name, media_id_str, request.user.username)
+                response_data['result_msg'] = 'new annotation ({}) of media {} by {} register'.format(selected_target.name, media_id_str, request.user.username)
+                response_data['result'] = 'saved'
             else:
                 annotation = Annotation.objects.get(media=media, created_by=request.user)
                 annotation.target = selected_target
                 print('annotation ({}) of {} by {} modified'.format(selected_target.name, media_id_str, request.user.username))
-                response_data['result'] = 'annotation ({}) of {} by {} modified'.format(selected_target.name, media_id_str, request.user.username)
+                response_data['result_msg'] = 'annotation ({}) of {} by {} modified'.format(selected_target.name, media_id_str, request.user.username)
+                response_data['result'] = 'change saved'
             annotation.save()
             print('annotation saved')
             return HttpResponse(

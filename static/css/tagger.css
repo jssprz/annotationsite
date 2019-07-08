@@ -1,0 +1,34 @@
+.carousel-indicators{
+    bottom: 0 !important;
+}
+
+.carousel-indicators li{
+    background-color: gray;
+}
+
+.carousel-indicators li.yes{
+    background-color: limegreen;
+}
+
+.carousel-indicators li.no{
+    background-color: red;
+}
+
+.carousel-indicators li.maybe{
+    background-color: #f5dd5d;
+}
+
+.card-body{
+    padding: 2.25rem !important;
+}
+
+/*.carousel-indicators li.active{*/
+/*    background-color: gray;*/
+/*}*/
+
+.result{
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    color: forestgreen;
+}

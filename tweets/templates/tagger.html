@@ -5,50 +5,91 @@
 {% block my_css_js %}
 {% load static %}
 <script src="{% static 'js/tagger.js' %}" type="text/javascript"></script>
+<link href="{% static 'css/tagger.css' %}" rel="stylesheet" type="text/css">
 {% endblock %}
 
 {% block content %}
 {% if user.is_authenticated %}
-  Hi {{ user.username }}!
-  <p><a href="{% url 'logout' %}">logout</a></p>
-  <div id="carouselExampleIndicators" class="carousel slide mx-auto" data-ride="carousel" style="width: 50rem;">
-    <ol class="carousel-indicators">
-      {% for m in medias %}
-        <li data-target="#carouselExampleIndicators" data-slide-to="{{ forloop.counter0 }}" class="{{ forloop.counter0|yesno:',active,' }}"></li>
-      {% endfor %}
-    </ol>
-    <div class="carousel-inner">
-    {% for m in medias %}
-      <div class="carousel-item {{ forloop.counter0|yesno:',active,' }}">
-        <form id="{{ m.id_str }}" action="{% url 'annotate' m.id_str %}" method="post">
-            {% csrf_token %}
-            <div class="card">
-              <img src="{{ m.local_image.url }}" class="d-block w-100">
-                <div class="card-body d-flex justify-content-center">
-                  {% for o in options %}
-                    <div class="form-check-inline">
-                      <label class="form-check-label">
-                        <input id="target{{ forloop.counter }}" name="target" type="radio" class="form-check-input" value="{{ o.name }}">{{ o.name }}
-                      </label>
+    <nav class="navbar navbar-dark bg-primary">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'logout' %}">logout</a>
+            </li>
+        </ul>
+        <span class="navbar-text">
+            Hola {{ user.username }}!
+        </span>
+    </nav>
+    <div id="media-tagger" class="carousel slide mx-auto" data-ride="carousel" style="width: 50rem; margin-top: 20px">
+        <ol class="carousel-indicators">
+          {% for m in medias %}
+            <li data-target="#media-tagger" data-slide-to="{{ forloop.counter0 }}" class="{{ forloop.counter0|yesno:',active,' }}"></li>
+          {% endfor %}
+        </ol>
+        <div class="carousel-inner">
+        {% for m in medias %}
+          <div class="carousel-item {{ forloop.counter0|yesno:',active,' }}">
+            <form id="{{ m.id_str }}" action="{% url 'annotate' m.id_str %}" method="post" data-item="{{ forloop.counter0 }}">
+                {% csrf_token %}
+                <div class="card">
+                  <img src="{{ m.local_image.url }}" class="d-block w-100">
+                    <div class="card-body d-flex justify-content-center">
+                      {% for o in options %}
+                        <div class="form-check-inline">
+                          <label class="form-check-label">
+                            <input id="target{{ forloop.counter }}" name="target" type="radio" class="form-check-input" value="{{ o.name }}">{{ o.name }}
+                          </label>
+                        </div>
+                      {% endfor %}
+                        <div class="result"></div>
                     </div>
-                  {% endfor %}
                 </div>
-            </div>
-        </form>
-      </div>
-    {% endfor %}
+            </form>
+          </div>
+        {% endfor %}
+        </div>
+        <a class="carousel-control-prev" href="#media-tagger" role="button" data-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="sr-only">Previous</span>
+        </a>
+        <a class="carousel-control-next" href="#media-tagger" role="button" data-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="sr-only">Next</span>
+        </a>
     </div>
-    <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
-      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-      <span class="sr-only">Previous</span>
-    </a>
-    <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
-      <span class="carousel-control-next-icon" aria-hidden="true"></span>
-      <span class="sr-only">Next</span>
-    </a>
-  </div>
+    <div class="mx-auto" style="margin-top: 20px; text-align: center">
+        <button type="button" class="btn btn-primary btn-sm" onClick="window.location.reload();">Cargar más imágenes</button>
+    </div>
 {% else %}
-  <p>You are not logged in</p>
-  <a href="{% url 'login' %}">login</a>
+    <p>Esta funcionalidad es solo para usuarios registrados</p>
+    <a href="{% url 'login' %}">login</a>
+    <!-- Button trigger modal -->
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#login-modal">
+      Login
+    </button>
+
+    <!-- Modal -->
+    <div class="modal fade" id="login-modal" tabindex="-1" role="dialog" aria-labelledby="modal-label" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form method="post">
+              <div class="modal-header">
+                <h5 class="modal-title" id="modal-label">Login</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                  {% csrf_token %}
+                  {{ form.as_p }}
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" type="submit">Login</button>
+              </div>
+            </form>
+        </div>
+      </div>
+    </div>
 {% endif %}
 {% endblock %}
