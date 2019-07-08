@@ -97,7 +97,7 @@ class Annotation(models.Model):
         on_delete=models.PROTECT,
     )
     media = models.ForeignKey(TweetMedia, on_delete=models.CASCADE, related_name='annotations')
-    target = models.ForeignKey(Target, on_delete=models.CASCADE)
+    # target = models.ForeignKey(Target, on_delete=models.CASCADE)
 
     def __str__(self):
         return '{} - {}'.format(self.media, self.target)

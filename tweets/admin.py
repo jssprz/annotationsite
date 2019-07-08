@@ -86,8 +86,8 @@ class TargetAdmin(admin.ModelAdmin):
 
 
 class AnnotationAdmin(admin.ModelAdmin):
-    list_display = ('created_by', 'target', 'media', 'get_image_tag',)
-    list_filter = ('created_by', 'target', )
+    list_display = ('created_by', 'media', 'get_image_tag',)
+    list_filter = ('created_by', )
 
     ordering = ('created_by',)
 
