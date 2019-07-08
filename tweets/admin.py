@@ -9,6 +9,7 @@ from .models import PrioritizedUser
 from .models import Annotation
 from .models import Target
 
+
 class TweetMediaInline(admin.TabularInline):
     model = Tweet.medias.through
 
@@ -84,6 +85,19 @@ class TargetAdmin(admin.ModelAdmin):
     ordering = ('name',)
 
 
+class AnnotationAdmin(admin.ModelAdmin):
+    list_display = ('created_by', 'target', 'media', 'get_image_tag',)
+    list_filter = ('created_by', 'target', )
+
+    ordering = ('created_by',)
+
+    list_per_page = 50
+
+    def get_image_tag(self, obj):
+        return obj.media.image_tag()
+    get_image_tag.short_description = 'Image'
+
+
 admin.site.register(Tweet, TweetAdmin)
 admin.site.register(TweetMedia, TweetMediaAdmin)
 admin.site.register(TweetHashTag)
@@ -91,4 +105,5 @@ admin.site.register(TweetUser, TweetUserAdmin)
 admin.site.register(ReportedUser, ReportedUserAdmin)
 admin.site.register(PrioritizedUser, PrioritizedUserAdmin)
 admin.site.register(Target, TargetAdmin)
+admin.site.register(Annotation, AnnotationAdmin)
 admin.site.site_header = 'Visual-Framing Administration'
