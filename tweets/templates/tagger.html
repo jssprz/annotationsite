@@ -4,6 +4,7 @@
 
 {% block my_css_js %}
 {% load static %}
+<script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.11.1/jquery.validate.min.js"></script>
 <script src="{% static 'js/tagger.js' %}" type="text/javascript"></script>
 <link href="{% static 'css/tagger.css' %}" rel="stylesheet" type="text/css">
 {% endblock %}
@@ -32,15 +33,36 @@
             <form id="{{ m.id_str }}" action="{% url 'annotate' m.id_str %}" method="post" data-item="{{ forloop.counter0 }}">
                 {% csrf_token %}
                 <div class="card">
-                  <img src="{{ m.local_image.url }}" class="d-block w-100">
-                    <div class="card-body d-flex justify-content-center">
-                      {% for o in options %}
-                        <div class="form-check-inline">
-                          <label class="form-check-label">
-                            <input id="target{{ forloop.counter }}" name="target" type="radio" class="form-check-input" value="{{ o.id }}">{{ o.name }}
-                          </label>
+                    <img src="{{ m.local_image.url }}" class="d-block w-100">
+                    <div class="card-body justify-content-center">
+                        <div class="form-group row" style="margin-left: 16%">
+                          {% for o in options %}
+                            <div class="form-check-inline">
+                              <label class="form-check-label">
+                                <input id="target{{ forloop.counter }}" name="target" type="radio" class="form-check-input" value="{{ o.id }}">{{ o.name }}
+                              </label>
+                            </div>
+                          {% endfor %}
                         </div>
-                      {% endfor %}
+                        <div class="form-group row meme-field" style="display: none">
+                            <label for="text" class="col-sm-2 col-form-label">Texto</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="text" name="text" placeholder="Texto que aparece en el meme">
+                                <div class="invalid-feedback">
+                                    Debe llenar uno de los dos campos
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group row meme-field" style="display: none">
+                            <label for="description" class="col-sm-2 col-form-label">Descripción</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="description" name="description" placeholder="Descripción breve sobre el meme">
+                                <div class="invalid-feedback">
+                                    Debe llenar uno de los dos campos
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary meme-field" style="display: none; margin: 0 16%;">Enviar</button>
                         <div class="result"></div>
                     </div>
                 </div>
