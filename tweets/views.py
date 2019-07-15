@@ -98,8 +98,8 @@ def tagger_statistics(request):
     template = loader.get_template('tagger_statistics.html')
 
     count_medias_per_count_of_annotations = Annotation.objects.values('media').annotate(
-        num_annotations=Count('created_by')).annotate(
-        count=Count('media')).order_by('-num_annotations')
+        num_annotations=Count('created_by')).values('media', 'num_annotations').annotate(
+        num_medias=Count('media')).order_by('-num_annotations')
     annotations_per_user = Annotation.objects.values('created_by__username').annotate(
         count=Count('media')).order_by('-count')
 

@@ -11,7 +11,7 @@
     <li>Cantidades de anotaciones por imagen:
         <ul>
             {% for t in statistics.count_medias_per_count_of_annotations %}
-            <li>Imágenes con {{ t.num_annotations }} anotaciones: {{ t.count }}</li>
+            <li>Imágenes con {{ t.num_annotations }} anotaciones: {{ t.num_medias }}</li>
             {% endfor %}
         </ul>
     </li>
