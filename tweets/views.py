@@ -62,7 +62,7 @@ def statistics(request):
             'languages_count': len(used_languages),
             'most_used_languages': list(used_languages.order_by('-count')[:12]),
             'locations_count': len(used_locations),
-            'most_used_locations': list(used_locations.order_by('-count')[:12])
+            'most_used_locations': list(used_locations.order_by('-count')[:12]),
         }
     }
     return HttpResponse(template.render(context, request))
@@ -94,16 +94,31 @@ def tagger(request):
     return HttpResponse(template.render(contex, request))
 
 
+def tagger_statistics(request):
+    template = loader.get_template('tagger_statistics.html')
+
+    count_medias_per_count_of_annotations = Annotation.objects.values('media').annotate(
+        num_annotations=Count('created_by')).annotate(
+        count=Count('media')).order_by('-num_annotations')
+    annotations_per_user = Annotation.objects.values('created_by__username').annotate(
+        count=Count('media')).order_by('-count')
+
+    context = {
+        'statistics': {
+            'count_medias_per_count_of_annotations': count_medias_per_count_of_annotations.all(),
+            'annotations_per_user': annotations_per_user.all()
+        }
+    }
+    return HttpResponse(template.render(context, request))
+
+
 def annotate(request, media_id_str):
     media = get_object_or_404(TweetMedia, id_str=media_id_str)
     if request.user.is_authenticated:
         try:
-            print('selected target {}'.format(request.POST['target']))
             selected_target = Target.objects.get(pk=request.POST['target'])
-            text = request.POST['text']
-            description = request.POST['description']
-            print('text: {}'.format(text))
-            print('description: {}'.format(description))
+            text = request.POST['text'].encode('utf-8')
+            description = request.POST['description'].encode('utf-8')
         except (KeyError, Target.DoesNotExist):
             print('target {} unknown'.format(request.POST['target']))
             # Redisplay the question voting form.
@@ -116,19 +131,17 @@ def annotate(request, media_id_str):
             if not Annotation.objects.filter(media=media, created_by=request.user).exists():
                 annotation = Annotation(media=media, created_by=request.user, target=selected_target,
                                         text_in_media=text, description_of_media=description)
-                print('new annotation ({}) of media {} by {} register'.format(selected_target.name, media_id_str, request.user.username))
-                response_data['result_msg'] = 'new annotation ({}) of media {} by {} register'.format(selected_target.name, media_id_str, request.user.username)
+                response_data['result_msg'] = 'saved new annotation ({}) of media {} by {}'.format(selected_target.name, media_id_str, request.user.username)
                 response_data['result'] = 'saved'
             else:
                 annotation = Annotation.objects.get(media=media, created_by=request.user)
                 annotation.target = selected_target
                 annotation.text_in_media = text
                 annotation.description_of_media = description
-                print('annotation ({}) of {} by {} modified'.format(selected_target.name, media_id_str, request.user.username))
-                response_data['result_msg'] = 'annotation ({}) of {} by {} modified'.format(selected_target.name, media_id_str, request.user.username)
+                response_data['result_msg'] = 'updated annotation ({}) of {} by {}'.format(selected_target.name, media_id_str, request.user.username)
                 response_data['result'] = 'change saved'
             annotation.save()
-            print('annotation saved')
+            print(response_data['result_msg'])
             return HttpResponse(
                 json.dumps(response_data),
                 content_type="application/json"

@@ -12,14 +12,23 @@
 {% block content %}
 {% if user.is_authenticated %}
     <nav class="navbar navbar-dark bg-primary">
-        <ul class="navbar-nav mr-auto">
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'logout' %}">logout</a>
-            </li>
-        </ul>
-        <span class="navbar-text">
-            Hola {{ user.username }}!
-        </span>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <span class="navbar-brand mb-0 h1">Clasificación de imágenes</span>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+                <li class="nav-item active">
+                    <a class="nav-link" href="#">Tagger <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'tagger_statistics' %}">Estadísticas de la clasificación</a>
+                </li>
+            </ul>
+            <span class="navbar-text">
+                Hola {{ user.username }}! <a class="nav-link" href="{% url 'logout' %}">logout</a>
+            </span>
+        </div>
     </nav>
     <div id="media-tagger" class="carousel slide mx-auto" data-ride="carousel" style="width: 50rem; margin-top: 20px">
         <ol class="carousel-indicators">

@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Tagger Statistics{% endblock %}
+
+{% block my_css_js %}
+{% endblock %}
+
+{% block content %}
+{% if statistics %}
+<ul>
+    <li>Cantidades de anotaciones por imagen:
+        <ul>
+            {% for t in statistics.count_medias_per_count_of_annotations %}
+            <li>Imágenes con {{ t.num_annotations }} anotaciones: {{ t.count }}</li>
+            {% endfor %}
+        </ul>
+    </li>
+    <li>Cantidades de anotaciones por usuario:
+        <ul>
+            {% for u in statistics.annotations_per_user %}
+            <li>{{ u.created_by__username }}: {{ u.count }}</li>
+            {% endfor %}
+        </ul>
+    </li>
+</ul>
+{% else %}
+    <p>Esta funcionalidad es solo para usuarios registrados</p>
+    <a href="{% url 'login' %}">login</a>
+{% endif %}
+{% endblock %}
