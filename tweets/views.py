@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpResponse
 from django.template import loader
 from django.views.static import serve as static_serve
-from django.db.models import Count
+from django.db.models import Count, Sum
 from django.urls import reverse
 from .models import Tweet, TweetMedia, TweetUser, TweetHashTag, Annotation, Target
 
@@ -97,15 +97,27 @@ def tagger(request):
 def tagger_statistics(request):
     template = loader.get_template('tagger_statistics.html')
 
-    count_medias_per_count_of_annotations = Annotation.objects.values('media').annotate(
-        num_annotations=Count('created_by')).values('media', 'num_annotations').annotate(
-        num_medias=Count('media')).order_by('-num_annotations')
+    annotations_per_media = Annotation.objects.values('media').annotate(
+        Count('created_by'))
+    print(len(annotations_per_media.all()))
+    print(annotations_per_media.all())
+
+    medias_count = {}
+    for r in annotations_per_media.all():
+        if r['created_by__count'] in medias_count:
+            medias_count[r['created_by__count']] += 1
+        else:
+            medias_count[r['created_by__count']] = 1
+
+    print(medias_count)
+
+    # count_medias_per_count_of_annotations = count_medias_per_count_of_annotations.order_by('-num_annotations')
     annotations_per_user = Annotation.objects.values('created_by__username').annotate(
         count=Count('media')).order_by('-count')
 
     context = {
         'statistics': {
-            'count_medias_per_count_of_annotations': count_medias_per_count_of_annotations.all(),
+            'count_medias_per_count_of_annotations': medias_count,
             'annotations_per_user': annotations_per_user.all()
         }
     }
