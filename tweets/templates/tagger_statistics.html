@@ -8,7 +8,7 @@
 {% block content %}
 {% if statistics %}
 <ul>
-    <li>Cantidades de anotaciones por imagen:
+    <li>Cantidad de Anotaciones: {{ statistics.count_of_annotations }}
         <ul>
             {% for ann_count, media_count in statistics.count_medias_per_count_of_annotations.items %}
             <li>Imágenes con {{ ann_count }} anotaciones: {{ media_count }}</li>

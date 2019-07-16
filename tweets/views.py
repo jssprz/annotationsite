@@ -117,6 +117,7 @@ def tagger_statistics(request):
 
     context = {
         'statistics': {
+            'count_of_annotations': Annotation.objects.count(),
             'count_medias_per_count_of_annotations': medias_count,
             'annotations_per_user': annotations_per_user.all()
         }
