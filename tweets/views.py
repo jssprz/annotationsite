@@ -97,7 +97,9 @@ def tagger(request):
 def tagger_statistics(request):
     template = loader.get_template('tagger_statistics.html')
 
-    annotations_per_media = Annotation.objects.values('media__id_str').annotate(Count('created_by'))
+    annotations = Annotation.objects.exclude(created_by__username='magdalena')
+
+    annotations_per_media = annotations.values('media__id_str').annotate(Count('created_by'))
     print(len(annotations_per_media.all()))
     print(annotations_per_media.all())
 
@@ -115,7 +117,7 @@ def tagger_statistics(request):
 
     icr_value = 0
     if 4 in medias_count:
-        annotations_per_target = Annotation.objects.filter(media__id_str__in=grouped_medias[4]).values('target').annotate(Count('created_by'))
+        annotations_per_target = annotations.filter(media__id_str__in=grouped_medias[4]).values('target').annotate(Count('created_by'))
 
         unanimous_count = 0
         for r in annotations_per_target.all():
@@ -125,12 +127,12 @@ def tagger_statistics(request):
         icr_value = unanimous_count / len(grouped_medias[4])
 
     # count_medias_per_count_of_annotations = count_medias_per_count_of_annotations.order_by('-num_annotations')
-    annotations_per_user = Annotation.objects.values('created_by__username').annotate(
+    annotations_per_user = annotations.values('created_by__username').annotate(
         count=Count('media')).order_by('-count')
 
     context = {
         'statistics': {
-            'count_of_annotations': Annotation.objects.count(),
+            'count_of_annotations': annotations.count(),
             'count_medias_per_count_of_annotations': medias_count,
             'annotations_per_user': annotations_per_user.all(),
             'icr': icr_value
