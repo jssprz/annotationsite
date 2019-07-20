@@ -22,7 +22,7 @@
             {% endfor %}
         </ul>
     </li>
-    <li>ICR: {{ statistics.icr }}</li>
+    <li>ICR: {% widthratio statistics.icr 1 100 %}%</li>
 </ul>
 {% else %}
     <p>Esta funcionalidad es solo para usuarios registrados</p>
