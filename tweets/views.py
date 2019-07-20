@@ -115,7 +115,7 @@ def tagger_statistics(request):
 
     print(medias_count)
 
-    icr_value = 0
+    icr_value = 0.0
     if 4 in medias_count:
         annotations_per_target = annotations.filter(media__id_str__in=grouped_medias[4]).values('target').annotate(Count('created_by'))
 
@@ -135,7 +135,7 @@ def tagger_statistics(request):
             'count_of_annotations': annotations.count(),
             'count_medias_per_count_of_annotations': medias_count,
             'annotations_per_user': annotations_per_user.all(),
-            'icr': icr_value
+            'icr': icr_value * 100.0
         }
     }
     return HttpResponse(template.render(context, request))
