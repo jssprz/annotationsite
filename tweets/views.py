@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpResponse
 from django.template import loader
 from django.views.static import serve as static_serve
-from django.db.models import Count, Sum
+from django.db.models import Count, Q
 from django.urls import reverse
 from .models import Tweet, TweetMedia, TweetUser, TweetHashTag, Annotation, Target
 
@@ -80,7 +80,9 @@ def tagger(request):
         full_annotated_medias_ids = Annotation.objects.annotate(num_per_media=Count('media')).filter(num_per_media__gte=5).values_list('media_id', flat=True)
         excluded_medias_ids = list(user_annotated_medias_ids) + list(full_annotated_medias_ids)
         print(excluded_medias_ids)
-        medias = TweetMedia.objects.filter(id__gte=3000, id__lte=50000).exclude(id__in=excluded_medias_ids).all()
+        criterion1 = Q(id__gte=3000)
+        criterion2 = Q(id__lte=50000)
+        medias = TweetMedia.objects.filter(criterion1 & criterion2).exclude(id__in=excluded_medias_ids).all()
         print(len(medias))
     else:
         # medias = TweetMedia.objects.filter(id__gt=50000).filter(id__lte=60000).all()
