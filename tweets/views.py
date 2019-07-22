@@ -83,7 +83,7 @@ def tagger(request):
         medias = TweetMedia.objects.filter(id__gte=3000).filter(id__lte=50000).exclude(id__in=excluded_medias_ids).all()
         print(len(medias))
         if len(medias) > 0:
-            print(medias[0].id, medias[len(medias)//2].id, medias[-1].id)
+            print(medias[0].id, medias[len(medias)//2].id, medias[len(medias)-1].id)
     else:
         # medias = TweetMedia.objects.filter(id__gt=50000).filter(id__lte=60000).all()
         base_url = reverse('index')
