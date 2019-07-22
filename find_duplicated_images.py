@@ -39,30 +39,35 @@ def findDup(parentFolder):
     return dups
 
 
-def find_and_remove_duplicated():
+def find_and_remove_duplicated(parent_folder):
     index = {}
     dups = {}
     for m in TweetMedia.objects.all():
         # print(i)
-        # path = os.path.join('H:', 'annotationsite/{}'.format(m.local_image.url))
-        path = os.path.join('./media', m.local_image.url)
+        path = os.path.join(parent_folder, m.local_image.url)
+        # path = os.path.join('./media', m.local_image.url)
         if os.path.exists(path):
             file_hash = hashfile(path)
             if file_hash in index:
+                print('duplicated media detected {}'.format(path))
                 indexed_media = index[file_hash]
-                # update tweets that reference this media
+
+                # update tweets that reference the duplicated tweet-media
                 for tweet in Tweet.objects.filter(medias__id_str=m.id_str):
+                    print('duplicated media used into {}'.format(tweet.id_str))
                     if indexed_media not in tweet.medias.all():
                         tweet.medias.add(indexed_media)
+                        print('indexed media added')
 
-                # delete tweetmedia
+                # delete duplicated tweet-media
                 m.delete()
 
-                # delete image file
+                # delete duplicated image file
                 os.remove(path)
 
                 dups[file_hash].append(path)
             else:
+                print('new hash detected of {} - {}'.format(m.id_str, path))
                 index[file_hash] = m
                 dups[file_hash] = [path]
         else:
@@ -101,4 +106,4 @@ if __name__ == '__main__':
         assert os.path.exists(pargs.folder), "{} folder doesn't exist".format(pargs.folder)
         printResults(findDup(pargs.folder))
     elif pargs.source == 'db':
-        printResults(find_and_remove_duplicated())
+        printResults(find_and_remove_duplicated(pargs.folder))
