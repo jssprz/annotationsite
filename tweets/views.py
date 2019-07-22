@@ -80,7 +80,7 @@ def tagger(request):
         full_annotated_medias_ids = Annotation.objects.annotate(num_per_media=Count('media')).filter(num_per_media__gte=5).values_list('media_id', flat=True)
         excluded_medias_ids = list(user_annotated_medias_ids) + list(full_annotated_medias_ids)
         print(excluded_medias_ids)
-        medias = TweetMedia.objects.filter(id__gt=50000).filter(id__lte=51000).exclude(id__in=excluded_medias_ids).order_by('id').all()
+        medias = TweetMedia.objects.filter(id__gt=50000).filter(id__lte=50100).exclude(id__in=excluded_medias_ids).order_by('id').all()
         print(len(medias))
         if len(medias) > 0:
             print(medias[0].id, medias[len(medias)//2].id, medias[len(medias)-1].id)
