@@ -7,5 +7,6 @@ urlpatterns = [
     path('statistics/', views.statistics, name='statistics'),
     path('tagger/', views.tagger, name='tagger'),
     path('tagger_statistics/', views.tagger_statistics, name='tagger_statistics'),
+    path('tagger_summary/', views.tagger_summary, name='tagger_summary'),
     path('<str:media_id_str>/annotate/', views.annotate, name='annotate')
 ]
