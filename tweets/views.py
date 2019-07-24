@@ -69,8 +69,6 @@ def statistics(request):
 
 
 def tagger(request):
-    template = loader.get_template('tagger.html')
-
     if request.user.is_authenticated:
         # apply the following filters to images
         # - first month (first 50000)
@@ -85,13 +83,13 @@ def tagger(request):
         if len(medias) > 0:
             print(medias[0].id, medias[len(medias)//2].id, medias[len(medias)-1].id)
     else:
-        # medias = TweetMedia.objects.filter(id__gt=50000).filter(id__lte=60000).all()
         base_url = reverse('index')
         login_url = '{}accounts/login/'.format(base_url)
         print('redirectig to {}'.format(login_url))
         response = redirect(login_url)
         return response
 
+    template = loader.get_template('tagger.html')
     contex = {'medias': medias[:25], 'options': Target.objects.all()}
     return HttpResponse(template.render(contex, request))
 
@@ -141,6 +139,38 @@ def tagger_statistics(request):
         }
     }
     return HttpResponse(template.render(context, request))
+
+
+def tagger_summary(request):
+    if request.user.is_authenticated:
+        annotations = Annotation.objects.exclude(created_by__username='magdalena')
+
+        users = annotations.values('created_by__username').distinct().all()
+        all_medias = annotations.values('media__local_image').distinct().all()
+
+        medias = {}
+        for m in all_medias:
+            medias[m['media__local_image']] = ['' for _ in users]
+
+        for i, user in enumerate(users):
+            annotated_medias = annotations.order_by('media__id').values('target__name', 'media__local_image').filter(created_by__username=user['created_by__username']).all()
+            for m in annotated_medias:
+                medias[m['media__local_image']][i] = m['target__name']
+    else:
+        base_url = reverse('index')
+        login_url = '{}accounts/login/'.format(base_url)
+        print('redirectig to {}'.format(login_url))
+        response = redirect(login_url)
+        return response
+
+    print(medias)
+
+    template = loader.get_template('tagger_summary.html')
+    contex = {
+        'users': users,
+        'medias': medias
+    }
+    return HttpResponse(template.render(contex, request))
 
 
 def annotate(request, media_id_str):
