@@ -143,7 +143,7 @@ def tagger_statistics(request):
 
 def tagger_summary(request):
     if request.user.is_authenticated:
-        annotations = Annotation.objects.exclude(created_by__username='magdalena')
+        annotations = Annotation.objects.exclude(created_by__username='magdalena').order_by()
 
         users = annotations.values('created_by__username').distinct().all()
         all_medias = annotations.values('media__local_image').distinct().all()
