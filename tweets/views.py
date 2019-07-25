@@ -144,20 +144,17 @@ def tagger_statistics(request):
 
 def tagger_summary(request):
     if request.user.is_authenticated:
-        annotations = Annotation.objects.exclude(created_by__username='magdalena').order_by()
+        annotations = Annotation.objects.exclude(created_by__username='magdalena').order_by('media__id')
 
         users = annotations.values('created_by__username').distinct().all()
         all_medias = annotations.values('media__id').distinct().all()
+        medias_with_annotations = TweetMedia.objects.filter(id__in=all_medias).order_by('id').all()
 
-        medias = {}
-        for m in all_medias:
-            medias[TweetMedia.objects.get(pk=m['media__id'])] = ['' for _ in users]
-
-        for i, user in enumerate(users):
-            user_annotations = annotations.filter(created_by__username=user['created_by__username']).all()
-            print(user_annotations)
-            for a in user_annotations:
-                medias[a.media][i] = a.target.name
+        for m in medias_with_annotations:
+            m.targets = ['' for _ in users]
+            for i, user in enumerate(users):
+                if annotations.filter(media=m, created_by__username=user['created_by__username']).exists():
+                    m.targets[i] = annotations.get(media=m, created_by__username=user['created_by__username']).target.name
     else:
         base_url = reverse('index')
         login_url = '{}accounts/login/'.format(base_url)
@@ -165,12 +162,12 @@ def tagger_summary(request):
         response = redirect(login_url)
         return response
 
-    print(medias)
+    print(medias_with_annotations[0].targets)
 
     template = loader.get_template('tagger_summary.html')
     contex = {
         'users': users,
-        'medias': medias
+        'medias': medias_with_annotations
     }
     return HttpResponse(template.render(contex, request))
 
