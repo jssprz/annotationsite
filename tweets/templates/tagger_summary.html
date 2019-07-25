@@ -23,11 +23,11 @@
                 </tr>
             </thead>
             <tbody>
-                {% for media in medias %}
+                {% for media, targets in medias.items %}
                 <tr>
                     <th scope="row">{{forloop.counter}}</th>
                     <td><img src="{{ media.local_image.url }}" width="150px" height="150px"></td>
-                    {% for target in media.targets %}
+                    {% for target in targets %}
                         <td>{{target}}</td>
                     {% endfor %}
                 </tr>
