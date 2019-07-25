@@ -8,6 +8,8 @@ from django.urls import reverse
 from .models import Tweet, TweetMedia, TweetUser, TweetHashTag, Annotation, Target
 from django.utils.safestring import mark_safe
 
+phase_ranges = {'pre-train': (50000, 50100), 'train': (50100, 51100), 'classify': (51100, 101100)}
+
 
 def cors_serve(request, path, document_root=None, show_indexes=False):
     """
@@ -70,6 +72,7 @@ def statistics(request):
 
 
 def tagger(request):
+    phase_range = phase_ranges['train']
     if request.user.is_authenticated:
         # apply the following filters to images
         # - first month (first 50000)
@@ -79,7 +82,10 @@ def tagger(request):
         full_annotated_medias_ids = Annotation.objects.annotate(num_per_media=Count('media')).filter(num_per_media__gte=5).values_list('media_id', flat=True)
         excluded_medias_ids = list(user_annotated_medias_ids) + list(full_annotated_medias_ids)
         print(excluded_medias_ids)
-        medias = TweetMedia.objects.filter(id__gt=50000).filter(id__lte=50100).exclude(id__in=excluded_medias_ids).order_by('id').all()
+        medias = TweetMedia.objects.filter(
+            id__gt=phase_range[0]).filter(
+            id__lte=phase_range[1]).exclude(
+            id__in=excluded_medias_ids).order_by('id').all()
         print(len(medias))
         if len(medias) > 0:
             print(medias[0].id, medias[len(medias)//2].id, medias[len(medias)-1].id)
@@ -96,9 +102,12 @@ def tagger(request):
 
 
 def tagger_statistics(request):
-    template = loader.get_template('tagger_statistics.html')
+    phase_range = phase_ranges['train']
 
-    annotations = Annotation.objects.exclude(created_by__username='magdalena')
+    annotations = Annotation.objects.filter(
+        media_id__gt=phase_range[0]).filter(
+        media_id__lte=phase_range[1]).exclude(
+        created_by__username='magdalena').order_by()
 
     annotations_per_media = annotations.values('media__id_str').annotate(Count('created_by'))
     print(len(annotations_per_media.all()))
@@ -131,6 +140,7 @@ def tagger_statistics(request):
     annotations_per_user = annotations.values('created_by__username').annotate(
         count=Count('media')).order_by('-count')
 
+    template = loader.get_template('tagger_statistics.html')
     context = {
         'statistics': {
             'count_of_annotations': annotations.count(),
@@ -143,8 +153,12 @@ def tagger_statistics(request):
 
 
 def tagger_summary(request):
+    phase_range = phase_ranges['train']
     if request.user.is_authenticated:
-        annotations = Annotation.objects.filter(media_id__gt=50000).filter(media_id__lte=50100).exclude(created_by__username='magdalena').order_by()
+        annotations = Annotation.objects.filter(
+            media_id__gt=phase_range[0]).filter(
+            media_id__lte=phase_range[1]).exclude(
+            created_by__username='magdalena').order_by()
 
         users = annotations.values('created_by__username').distinct().all()
         all_medias = annotations.values('media__id').distinct().all()
