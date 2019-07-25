@@ -6,6 +6,7 @@ from django.views.static import serve as static_serve
 from django.db.models import Count, Q
 from django.urls import reverse
 from .models import Tweet, TweetMedia, TweetUser, TweetHashTag, Annotation, Target
+from django.utils.safestring import mark_safe
 
 
 def cors_serve(request, path, document_root=None, show_indexes=False):
@@ -146,16 +147,17 @@ def tagger_summary(request):
         annotations = Annotation.objects.exclude(created_by__username='magdalena').order_by()
 
         users = annotations.values('created_by__username').distinct().all()
-        all_medias = annotations.values('media__local_image').distinct().all()
+        all_medias = annotations.values('media__id').distinct().all()
 
         medias = {}
         for m in all_medias:
-            medias[m['media__local_image']] = ['' for _ in users]
+            medias[TweetMedia.objects.get(pk=m['media__id'])] = ['' for _ in users]
 
         for i, user in enumerate(users):
-            annotated_medias = annotations.order_by('media__id').values('target__name', 'media__local_image').filter(created_by__username=user['created_by__username']).all()
-            for m in annotated_medias:
-                medias[m['media__local_image']][i] = m['target__name']
+            user_annotations = annotations.filter(created_by__username=user['created_by__username']).all()
+            print(user_annotations)
+            for a in user_annotations:
+                medias[a.media][i] = a.target.name
     else:
         base_url = reverse('index')
         login_url = '{}accounts/login/'.format(base_url)

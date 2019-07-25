@@ -24,7 +24,7 @@
             <tbody>
                 {% for media, targets in medias.items %}
                 <tr>
-                    <th scope="row"><img src="/media/{{ media }}" width="150px" height="150px"></th>
+                    <th scope="row"><img src="{{ media.local_image.url }}" width="150px" height="150px"></th>
                     {% for target in targets %}
                         <td>{{target}}</td>
                     {% endfor %}
