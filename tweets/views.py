@@ -1,4 +1,5 @@
 import json
+import csv
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpResponse
 from django.template import loader
@@ -9,6 +10,7 @@ from .models import Tweet, TweetMedia, TweetUser, TweetHashTag, Annotation, Targ
 from django.utils.safestring import mark_safe
 
 phase_ranges = {'pre-train': (50000, 50100), 'train': (50100, 51100), 'classify': (51100, 101100)}
+current_phase = 'train'
 
 
 def cors_serve(request, path, document_root=None, show_indexes=False):
@@ -72,7 +74,7 @@ def statistics(request):
 
 
 def tagger(request):
-    phase_range = phase_ranges['train']
+    phase_range = phase_ranges[current_phase]
     if request.user.is_authenticated:
         # apply the following filters to images
         # - first month (first 50000)
@@ -102,7 +104,7 @@ def tagger(request):
 
 
 def tagger_statistics(request):
-    phase_range = phase_ranges['train']
+    phase_range = phase_ranges[current_phase]
 
     annotations = Annotation.objects.filter(
         media_id__gt=phase_range[0]).filter(
@@ -152,26 +154,32 @@ def tagger_statistics(request):
     return HttpResponse(template.render(context, request))
 
 
+def generate_tagger_summary(phase_range):
+    annotations = Annotation.objects.filter(
+        media_id__gt=phase_range[0]).filter(
+        media_id__lte=phase_range[1]).exclude(
+        created_by__username='magdalena').order_by()
+
+    users = annotations.values('created_by__username').distinct().all()
+    all_medias = annotations.values('media__id').distinct().all()
+
+    medias = {}
+    for m in all_medias:
+        medias[TweetMedia.objects.get(pk=m['media__id'])] = ['' for _ in users]
+
+    for i, user in enumerate(users):
+        user_annotations = annotations.filter(created_by__username=user['created_by__username']).all()
+        print(user_annotations)
+        for a in user_annotations:
+            medias[a.media][i] = a.target.name
+
+    return users, medias
+
+
 def tagger_summary(request):
-    phase_range = phase_ranges['train']
+    phase_range = phase_ranges[current_phase]
     if request.user.is_authenticated:
-        annotations = Annotation.objects.filter(
-            media_id__gt=phase_range[0]).filter(
-            media_id__lte=phase_range[1]).exclude(
-            created_by__username='magdalena').order_by()
-
-        users = annotations.values('created_by__username').distinct().all()
-        all_medias = annotations.values('media__id').distinct().all()
-
-        medias = {}
-        for m in all_medias:
-            medias[TweetMedia.objects.get(pk=m['media__id'])] = ['' for _ in users]
-
-        for i, user in enumerate(users):
-            user_annotations = annotations.filter(created_by__username=user['created_by__username']).all()
-            print(user_annotations)
-            for a in user_annotations:
-                medias[a.media][i] = a.target.name
+        users, medias = generate_tagger_summary(phase_range)
     else:
         base_url = reverse('index')
         login_url = '{}accounts/login/'.format(base_url)
@@ -179,14 +187,32 @@ def tagger_summary(request):
         response = redirect(login_url)
         return response
 
-    print(medias)
-
     template = loader.get_template('tagger_summary.html')
-    contex = {
+    context = {
         'users': users,
         'medias': medias
     }
-    return HttpResponse(template.render(contex, request))
+    return HttpResponse(template.render(context, request))
+
+
+def tagger_summary_csv(request):
+    phase_range = phase_ranges[current_phase]
+    users, medias = generate_tagger_summary(phase_range)
+    # Create the HttpResponse object with the appropriate CSV header.
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="tagger_summary_{}_phase.csv"'.format(current_phase)
+
+    writer = csv.writer(response)
+    first_row = ['CASO'] + ['Codificador{}' for i, _ in enumerate(users, start=1)]
+    writer.writerow(first_row)
+
+    def get_id(t):
+        return 0 if t == 'No-meme' else 1 if t == 'Meme' else 2
+
+    for i, (m, targets) in enumerate(medias.items(), start=1):
+        writer.writerow([i] + [get_id(t) for t in targets])
+
+    return response
 
 
 def annotate(request, media_id_str):

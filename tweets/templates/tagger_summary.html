@@ -12,28 +12,35 @@
 {% block content %}
 {% if user.is_authenticated %}
     <div class="container">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Imagen</th>
-                    {% for u in users %}
-                        <th scope="col">{{ u.created_by__username }}</th>
+        <div class="row">
+            <div class="col-md-2 ml-md-auto" style="margin: 1rem 0 1rem 0">
+                <a class="btn btn-info" href="{% url 'tagger_summary_csv' %}" role="button">Descargar</a>
+            </div>
+        </div>
+        <div class="row">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Imagen</th>
+                        {% for u in users %}
+                            <th scope="col">{{ u.created_by__username }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for media, targets in medias.items %}
+                    <tr>
+                        <th scope="row">{{forloop.counter}}</th>
+                        <td><img src="{{ media.local_image.url }}" width="150px" height="150px"></td>
+                        {% for target in targets %}
+                            <td>{{target}}</td>
+                        {% endfor %}
+                    </tr>
                     {% endfor %}
-                </tr>
-            </thead>
-            <tbody>
-                {% for media, targets in medias.items %}
-                <tr>
-                    <th scope="row">{{forloop.counter}}</th>
-                    <td><img src="{{ media.local_image.url }}" width="150px" height="150px"></td>
-                    {% for target in targets %}
-                        <td>{{target}}</td>
-                    {% endfor %}
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        </div>
     </div>
 {% else %}
     <p>Esta funcionalidad es solo para usuarios registrados</p>
