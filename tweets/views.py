@@ -203,7 +203,7 @@ def tagger_summary_csv(request):
     response['Content-Disposition'] = 'attachment; filename="tagger_summary_{}_phase.csv"'.format(current_phase)
 
     writer = csv.writer(response)
-    first_row = ['CASO'] + ['Codificador{}' for i, _ in enumerate(users, start=1)]
+    first_row = ['CASO'] + ['Codificador{}'.format(i) for i, _ in enumerate(users, start=1)]
     writer.writerow(first_row)
 
     def get_id(t):
