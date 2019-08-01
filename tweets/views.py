@@ -129,7 +129,7 @@ def tagger_statistics(request):
 
     icr_value = 0.0
     if 4 in medias_count:
-        annotations_per_target = annotations.filter(media__id_str__in=grouped_medias[4]).values('target').annotate(Count('created_by'))
+        annotations_per_target = annotations.filter(media__id_str__in=grouped_medias[4]).values('media', 'target').annotate(Count('created_by'))
 
         unanimous_count = 0
         for r in annotations_per_target.all():
