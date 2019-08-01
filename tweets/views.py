@@ -1,5 +1,7 @@
 import json
 import csv
+import codecs
+
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpResponse
 from django.template import loader
@@ -171,7 +173,9 @@ def generate_tagger_summary(phase_range):
         user_annotations = annotations.filter(created_by__username=user['created_by__username']).all()
         print(user_annotations)
         for a in user_annotations:
-            medias[a.media][i] = a.target.name
+            medias[a.media][i] = (a.target.name,
+                                  codecs.escape_decode(a.text_in_media)[0].decode()[2:-1],
+                                  codecs.escape_decode(a.description_of_media)[0].decode()[2:-1])
 
     return users, medias
 
@@ -207,10 +211,10 @@ def tagger_summary_csv(request):
     writer.writerow(first_row)
 
     def get_id(t):
-        return 0 if t == 'No-meme' else 1 if t == 'Meme' else 2
+        return 0 if t == 'No-meme' else 1 if t == 'Meme' else 2 if t == 'Dudoso' else 3
 
     for i, (m, targets) in enumerate(medias.items(), start=1):
-        writer.writerow([i] + [get_id(t) for t in targets])
+        writer.writerow([i] + [get_id(t[0]) for t in targets])
 
     return response
 
