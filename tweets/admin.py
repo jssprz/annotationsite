@@ -86,15 +86,22 @@ class TargetAdmin(admin.ModelAdmin):
 
 
 class AnnotationAdmin(admin.ModelAdmin):
-    list_display = ('created_by', 'target', 'media', 'text_in_media', 'description_of_media', 'get_image_tag',)
+    list_display = ('created_by', 'target', 'media', 'get_text_in_media', 'get_description_of_media', 'get_image_tag',)
     list_filter = ('created_by', 'target', )
 
     ordering = ('created_by',)
 
     list_per_page = 50
 
+    def get_text_in_media(self, obj):
+        return obj.text_in_media.decode()
+
+    def get_description_of_media(self, obj):
+        return obj.description_of_media.decode()
+
     def get_image_tag(self, obj):
         return obj.media.image_tag()
+
     get_image_tag.short_description = 'Image'
 
 
