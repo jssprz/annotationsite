@@ -6,16 +6,20 @@
     background-color: gray;
 }
 
-.carousel-indicators li.yes{
+.carousel-indicators li.green{
     background-color: limegreen;
 }
 
-.carousel-indicators li.no{
+.carousel-indicators li.red{
     background-color: red;
 }
 
-.carousel-indicators li.maybe{
+.carousel-indicators li.yellow{
     background-color: #f5dd5d;
+}
+
+.carousel-indicators li.blue{
+    background-color: #3875d7;
 }
 
 .card-body{

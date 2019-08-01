@@ -35,15 +35,18 @@ $(document).ready(function() {
                     target = form.serializeArray()[1].value;
                     id = form.attr('data-item');
                     indicator = $('[data-slide-to="' + id + '"]');
-                    indicator.removeClass('yes');
-                    indicator.removeClass('no');
-                    indicator.removeClass('maybe');
+                    indicator.removeClass('green');
+                    indicator.removeClass('red');
+                    indicator.removeClass('yellow');
+                    indicator.removeClass('blue');
                     if (target === '1')
-                        indicator.addClass('yes');
+                        indicator.addClass('green');
                     else if (target === '2')
-                        indicator.addClass('no');
+                        indicator.addClass('red');
                     else if (target === '3')
-                        indicator.addClass('maybe');
+                        indicator.addClass('yellow');
+                    else if (target === '4')
+                        indicator.addClass('blue');
                 }
             });
         }
@@ -53,7 +56,7 @@ $(document).ready(function() {
         var form = $(this).closest('form');
         form.find('.result').first().text('');
 
-        if($(this).val() === '1')
+        if($(this).val() === '1' || $(this).val() === '4')
             form.find('.meme-field').show();
         else{
             form.find('.meme-field').hide();
