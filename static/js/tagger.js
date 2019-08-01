@@ -1,6 +1,7 @@
 $.validator.addMethod("oneFilled", function(value, element) {
     var form = $(element).closest('form');
-    if (form.find("input[name='target']:checked").val() === '1')
+    var option = form.find("input[name='target']:checked")
+    if (option.val() === '1' || option.val() === '4')
         return (form.find("#text").val() !== '' || form.find("#description").val() !== '');
     return true;
 }, "* Debe llenar uno de los dos campos");
