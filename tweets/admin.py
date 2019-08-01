@@ -96,11 +96,11 @@ class AnnotationAdmin(admin.ModelAdmin):
     list_per_page = 50
 
     def get_text_in_media(self, obj):
-        return codecs.escape_decode(obj.text_in_media).decode()[2:-1]
+        return codecs.escape_decode(obj.text_in_media)[0].decode()[2:-1]
     get_text_in_media.short_description = 'Texto en los memes'
 
     def get_description_of_media(self, obj):
-        return obj.description_of_media.decode()
+        return codecs.escape_decode(obj.description_of_media)[0].decode()[2:-1]
     get_description_of_media.short_description = 'Descripciones de los memes'
 
     def get_image_tag(self, obj):
