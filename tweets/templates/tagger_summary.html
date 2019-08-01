@@ -11,7 +11,7 @@
 
 {% block content %}
 {% if user.is_authenticated %}
-    <div class="container">
+    <div>
         <div class="row">
             <div class="col-md-2 ml-md-auto" style="margin: 1rem 0 1rem 0">
                 <a class="btn btn-info" href="{% url 'tagger_summary_csv' %}" role="button">Descargar</a>
@@ -36,11 +36,11 @@
                         {% for target, text, description in targets %}
                             <td>
                                 {% if target == 'Meme' or target == 'Sticker'  %}
-                                    <div class="row">{{target}}</div>
-                                    <div class="row">Texto: {{text}}</div>
-                                    <div class="row">Desc: {{description}}</div>
+                                    <div class="row"><span class="font-weight-bold">{{target}}</span></div>
+                                    <div class="row"><span class="font-weight-bold">T:</span> {{text}}</div>
+                                    <div class="row"><span class="font-weight-bold">D:</span> {{description}}</div>
                                 {% else %}
-                                    {{target}}
+                                    <span class="font-weight-bold">{{target}}</span>
                                 {% endif %}
                             </td>
                         {% endfor %}
