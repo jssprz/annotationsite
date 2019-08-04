@@ -100,6 +100,7 @@ class Annotation(models.Model):
     target = models.ForeignKey(Target, on_delete=models.CASCADE)
     text_in_media = models.CharField(max_length=250, default='', blank=True, verbose_name='texto en la imagen')
     description_of_media = models.CharField(max_length=250, default='', blank=True, verbose_name='descripción de la imagen')
+    interpretation = models.CharField(max_length=250, default='', blank=True, verbose_name='interpretación de la imagen')
 
     def __str__(self):
         return '{} - {}'.format(self.media, self.target)

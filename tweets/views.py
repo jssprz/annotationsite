@@ -11,7 +11,7 @@ from django.urls import reverse
 from .models import Tweet, TweetMedia, TweetUser, TweetHashTag, Annotation, Target
 from django.utils.safestring import mark_safe
 
-phase_ranges = {'pre-train': (50000, 50100), 'train': (50100, 51100), 'classify': (51100, 101100)}
+phase_ranges = {'pre-train': (50000, 50100), 'train': (51100, 52100), 'classify': (52100, 102100)}
 current_phase = 'train'
 
 
@@ -175,9 +175,9 @@ def generate_tagger_summary(phase_range):
         for a in user_annotations:
             medias[a.media][i] = (a.target.name,
                                   codecs.escape_decode(a.text_in_media)[0].decode()[2:-1],
-                                  codecs.escape_decode(a.description_of_media)[0].decode()[2:-1])
-
-    return users, medias
+                                  codecs.escape_decode(a.description_of_media)[0].decode()[2:-1],
+                                  codecs.escape_decode(a.interpretation)[0].decode()[2:-1])
+        return users, medias
 
 
 def tagger_summary(request):
@@ -226,6 +226,7 @@ def annotate(request, media_id_str):
             selected_target = Target.objects.get(pk=request.POST['target'])
             text = request.POST['text'].encode('utf-8')
             description = request.POST['description'].encode('utf-8')
+            interpretation = request.POST['interpretation'].encode('utf-8')
         except (KeyError, Target.DoesNotExist):
             print('target {} unknown'.format(request.POST['target']))
             # Redisplay the question voting form.
@@ -237,7 +238,7 @@ def annotate(request, media_id_str):
             response_data = {}
             if not Annotation.objects.filter(media=media, created_by=request.user).exists():
                 annotation = Annotation(media=media, created_by=request.user, target=selected_target,
-                                        text_in_media=text, description_of_media=description)
+                                        text_in_media=text, description_of_media=description, interpretation=interpretation)
                 response_data['result_msg'] = 'saved new annotation ({}) of media {} by {}'.format(selected_target.name, media_id_str, request.user.username)
                 response_data['result'] = 'saved'
             else:

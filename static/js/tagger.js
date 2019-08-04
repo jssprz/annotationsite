@@ -1,16 +1,22 @@
 $.validator.addMethod("oneFilled", function(value, element) {
     var form = $(element).closest('form');
-    var option = form.find("input[name='target']:checked")
-    if (option.val() === '1' || option.val() === '4')
-        return (form.find("#text").val() !== '' || form.find("#description").val() !== '');
+    var option = form.find("input[name='target']:checked");
+    if (option.val() === '1')
+        return (form.find("#text").val() !== '' &&
+            form.find("#description").val() !== '' &&
+            form.find("#interpretation").val() !== '');
+    else if (option.val() === '4')
+        return (form.find("#text").val() !== '' &&
+            form.find("#description").val() !== '');
     return true;
-}, "* Debe llenar uno de los dos campos");
+}, "* Debe completar este campo");
 
 $(document).ready(function() {
     $('form').validate({
         rules: {
             text: { oneFilled: true },
-            description: { oneFilled: true }
+            description: { oneFilled: true },
+            interpretation: { oneFilled: true }
         },
         // highlight: function (element) {
         //     $(element).closest('.control-group').removeClass('success').addClass('error');
@@ -57,9 +63,16 @@ $(document).ready(function() {
         var form = $(this).closest('form');
         form.find('.result').first().text('');
 
-        if($(this).val() === '1' || $(this).val() === '4')
+        if($(this).val() === '1') {
+            form.find('.sticker-field').hide();
             form.find('.meme-field').show();
+        }
+        else if($(this).val() === '4') {
+            form.find('.meme-field').hide();
+            form.find('.sticker-field').show();
+        }
         else{
+            form.find('.sticker-field').hide();
             form.find('.meme-field').hide();
             $(this).closest('form').submit();
         }

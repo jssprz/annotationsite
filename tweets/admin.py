@@ -88,7 +88,8 @@ class TargetAdmin(admin.ModelAdmin):
 
 
 class AnnotationAdmin(admin.ModelAdmin):
-    list_display = ('created_by', 'target', 'media', 'get_text_in_media', 'get_description_of_media', 'get_image_tag',)
+    list_display = ('created_by', 'target', 'media', 'get_text_in_media', 'get_description_of_media',
+                    'get_interpretation', 'get_image_tag',)
     list_filter = ('created_by', 'target', )
 
     ordering = ('created_by',)
@@ -97,11 +98,15 @@ class AnnotationAdmin(admin.ModelAdmin):
 
     def get_text_in_media(self, obj):
         return codecs.escape_decode(obj.text_in_media)[0].decode()[2:-1]
-    get_text_in_media.short_description = 'Texto en los memes'
+    get_text_in_media.short_description = 'Textos'
 
     def get_description_of_media(self, obj):
         return codecs.escape_decode(obj.description_of_media)[0].decode()[2:-1]
-    get_description_of_media.short_description = 'Descripciones de los memes'
+    get_description_of_media.short_description = 'Descripciones'
+
+    def get_interpretation(self, obj):
+        return codecs.escape_decode(obj.interpretation)[0].decode()[2:-1]
+    get_interpretation.short_description = 'Interpretaciones'
 
     def get_image_tag(self, obj):
         return obj.media.image_tag()
