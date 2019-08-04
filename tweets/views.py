@@ -177,7 +177,8 @@ def generate_tagger_summary(phase_range):
                                   codecs.escape_decode(a.text_in_media)[0].decode()[2:-1],
                                   codecs.escape_decode(a.description_of_media)[0].decode()[2:-1],
                                   codecs.escape_decode(a.interpretation)[0].decode()[2:-1])
-        return users, medias
+
+    return users, medias
 
 
 def tagger_summary(request):
