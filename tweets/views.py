@@ -11,8 +11,13 @@ from django.urls import reverse
 from .models import Tweet, TweetMedia, TweetUser, TweetHashTag, Annotation, Target
 from django.utils.safestring import mark_safe
 
-phase_ranges = {'pre-train': (50000, 50100), 'train': (51100, 52100), 'classify': (52100, 102100)}
-current_phase = 'train'
+phase_ranges = {'pre-train': (50000, 50100), 'train': (51100, 52100),
+                'classify': {'valentina': (52100, 65100),
+                             'frespinoza': (65100, 78100),
+                             'mnjarami': (78100, 91100),
+                             'japoblete': (91100, 104100),
+                             'unknown': (104100, 154100)}}
+current_phase = 'classify'
 
 
 def cors_serve(request, path, document_root=None, show_indexes=False):
@@ -78,6 +83,8 @@ def statistics(request):
 def tagger(request):
     phase_range = phase_ranges[current_phase]
     if request.user.is_authenticated:
+        if type(phase_range) is not tuple:
+            phase_range = phase_range[request.user.username] if request.user.username in phase_range else phase_range['unknown']
         # apply the following filters to images
         # - first month (first 50000)
         # - less than 10 annotations
@@ -108,52 +115,63 @@ def tagger(request):
 def tagger_statistics(request):
     phase_range = phase_ranges[current_phase]
 
-    annotations = Annotation.objects.filter(
-        media_id__gt=phase_range[0]).filter(
-        media_id__lte=phase_range[1]).exclude(
-        created_by__username='magdalena').order_by()
+    if request.user.is_authenticated:
+        if type(phase_range) is not tuple:
+            phase_range = phase_range[request.user.username] if request.user.username in phase_range else phase_range[
+                'unknown']
 
-    annotations_per_media = annotations.values('media__id_str').annotate(Count('created_by'))
-    print(len(annotations_per_media.all()))
-    print(annotations_per_media.all())
+        annotations = Annotation.objects.filter(
+            media_id__gt=phase_range[0]).filter(
+            media_id__lte=phase_range[1]).exclude(
+            created_by__username='magdalena').order_by()
 
-    medias_count = {}
-    grouped_medias = {}
-    for r in annotations_per_media.all():
-        if r['created_by__count'] in medias_count:
-            medias_count[r['created_by__count']] += 1
-            grouped_medias[r['created_by__count']].append(r['media__id_str'])
-        else:
-            medias_count[r['created_by__count']] = 1
-            grouped_medias[r['created_by__count']] = [r['media__id_str']]
+        annotations_per_media = annotations.values('media__id_str').annotate(Count('created_by'))
+        print(len(annotations_per_media.all()))
+        print(annotations_per_media.all())
 
-    print(medias_count)
+        medias_count = {}
+        grouped_medias = {}
+        for r in annotations_per_media.all():
+            if r['created_by__count'] in medias_count:
+                medias_count[r['created_by__count']] += 1
+                grouped_medias[r['created_by__count']].append(r['media__id_str'])
+            else:
+                medias_count[r['created_by__count']] = 1
+                grouped_medias[r['created_by__count']] = [r['media__id_str']]
 
-    icr_value = 0.0
-    if 4 in medias_count:
-        annotations_per_target = annotations.filter(media__id_str__in=grouped_medias[4]).values('media', 'target').annotate(Count('created_by'))
+        print(medias_count)
 
-        unanimous_count = 0
-        for r in annotations_per_target.all():
-            if r['created_by__count'] == 4:
-                unanimous_count += 1
+        icr_value = 0.0
+        if 4 in medias_count:
+            annotations_per_target = annotations.filter(media__id_str__in=grouped_medias[4]).values('media', 'target').annotate(Count('created_by'))
 
-        icr_value = unanimous_count / len(grouped_medias[4])
+            unanimous_count = 0
+            for r in annotations_per_target.all():
+                if r['created_by__count'] == 4:
+                    unanimous_count += 1
 
-    # count_medias_per_count_of_annotations = count_medias_per_count_of_annotations.order_by('-num_annotations')
-    annotations_per_user = annotations.values('created_by__username').annotate(
-        count=Count('media')).order_by('-count')
+            icr_value = unanimous_count / len(grouped_medias[4])
 
-    template = loader.get_template('tagger_statistics.html')
-    context = {
-        'statistics': {
-            'count_of_annotations': annotations.count(),
-            'count_medias_per_count_of_annotations': medias_count,
-            'annotations_per_user': annotations_per_user.all(),
-            'icr': icr_value * 100.0
+        # count_medias_per_count_of_annotations = count_medias_per_count_of_annotations.order_by('-num_annotations')
+        annotations_per_user = annotations.values('created_by__username').annotate(
+            count=Count('media')).order_by('-count')
+
+        template = loader.get_template('tagger_statistics.html')
+        context = {
+            'statistics': {
+                'count_of_annotations': annotations.count(),
+                'count_medias_per_count_of_annotations': medias_count,
+                'annotations_per_user': annotations_per_user.all(),
+                'icr': icr_value * 100.0
+            }
         }
-    }
-    return HttpResponse(template.render(context, request))
+        return HttpResponse(template.render(context, request))
+    else:
+        base_url = reverse('index')
+        login_url = '{}accounts/login/'.format(base_url)
+        print('redirectig to {}'.format(login_url))
+        response = redirect(login_url)
+        return response
 
 
 def generate_tagger_summary(phase_range):
@@ -184,6 +202,9 @@ def generate_tagger_summary(phase_range):
 def tagger_summary(request):
     phase_range = phase_ranges[current_phase]
     if request.user.is_authenticated:
+        if type(phase_range) is not tuple:
+            phase_range = phase_range[request.user.username] if request.user.username in phase_range else phase_range[
+                'unknown']
         users, medias = generate_tagger_summary(phase_range)
     else:
         base_url = reverse('index')
@@ -202,22 +223,34 @@ def tagger_summary(request):
 
 def tagger_summary_csv(request):
     phase_range = phase_ranges[current_phase]
-    users, medias = generate_tagger_summary(phase_range)
-    # Create the HttpResponse object with the appropriate CSV header.
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="tagger_summary_{}_phase.csv"'.format(current_phase)
 
-    writer = csv.writer(response)
-    first_row = ['CASO'] + ['Codificador{}'.format(i) for i, _ in enumerate(users, start=1)]
-    writer.writerow(first_row)
+    if request.user.is_authenticated:
+        if type(phase_range) is not tuple:
+            phase_range = phase_range[request.user.username] if request.user.username in phase_range else phase_range[
+                'unknown']
 
-    def get_id(t):
-        return 0 if t == 'No-meme' else 1 if t == 'Meme' else 2 if t == 'Dudoso' else 3
+        users, medias = generate_tagger_summary(phase_range)
+        # Create the HttpResponse object with the appropriate CSV header.
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="tagger_summary_{}_phase.csv"'.format(current_phase)
 
-    for i, (m, targets) in enumerate(medias.items(), start=1):
-        writer.writerow([i] + [get_id(t[0]) for t in targets])
+        writer = csv.writer(response)
+        first_row = ['CASO'] + ['Codificador{}'.format(i) for i, _ in enumerate(users, start=1)]
+        writer.writerow(first_row)
 
-    return response
+        def get_id(t):
+            return 0 if t == 'No-meme' else 1 if t == 'Meme' else 2 if t == 'Dudoso' else 3
+
+        for i, (m, targets) in enumerate(medias.items(), start=1):
+            writer.writerow([i] + [get_id(t[0]) for t in targets])
+
+        return response
+    else:
+        base_url = reverse('index')
+        login_url = '{}accounts/login/'.format(base_url)
+        print('redirectig to {}'.format(login_url))
+        response = redirect(login_url)
+        return response
 
 
 def annotate(request, media_id_str):
