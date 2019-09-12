@@ -202,7 +202,9 @@ def generate_tagger_summary(phase_range):
 def tagger_summary(request):
     phase_range = phase_ranges[current_phase]
     if request.user.is_authenticated:
-        if type(phase_range) is not tuple:
+        if request.user.username in ['jeperez', 'magdalena']:
+            phase_range = (52100, 104100)
+        elif type(phase_range) is not tuple:
             phase_range = phase_range[request.user.username] if request.user.username in phase_range else phase_range[
                 'unknown']
         users, medias = generate_tagger_summary(phase_range)
