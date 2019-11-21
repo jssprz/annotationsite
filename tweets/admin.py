@@ -12,6 +12,18 @@ from .models import Annotation
 from .models import Target
 
 
+class PhaseFilter(admin.SimpleListFilter):
+    title = 'Fase'
+    parameter_name = 'media'
+
+    def lookups(self, request, model_admin):
+        return [('Fase de 50000', 'Fase de 50000')]
+
+    def queryset(self, request, queryset):
+        if self.value() == 'Fase de 50000':
+            phase_range = (52100,104100)
+            return queryset.filter(media__id__gt=phase_range[0]).filter(media__id__lte=phase_range[1])
+
 class TweetMediaInline(admin.TabularInline):
     model = Tweet.medias.through
 
@@ -35,8 +47,9 @@ class AnnotationInline(admin.TabularInline):
 
 
 class TweetAdmin(admin.ModelAdmin):
-    list_display = ('id_str', 'user', 'text', 'images_tags')
-    list_filter = ('user', 'hashtags',)
+    list_display = ('id_str', 'user', 'text', 'favorite_count', 'retweet_count', 'location', 'lang', 'images_tags')
+    #list_filter = ('user', 'hashtags',)
+    search_fields = ('id_str', )
 
     list_per_page = 30
 
@@ -44,12 +57,14 @@ class TweetAdmin(admin.ModelAdmin):
 
 
 class TweetMediaAdmin(admin.ModelAdmin):
-    list_display = ('id_str', 'url', 'get_users', 'image_tag',)
+    list_display = ('id_str', 'url', 'get_tweets', 'get_users', 'image_tag',)
     #list_filter = ('target',)
 
     #list_editable = ('target',)
 
     list_per_page = 20
+
+    search_fields = ('id_str', )
 
     readonly_fields = ('image_tag',)
 
@@ -58,6 +73,10 @@ class TweetMediaAdmin(admin.ModelAdmin):
     def get_users(self, obj):
         return [', '.join([t.user.screen_name for t in obj.tweets.all()])]
     get_users.short_description = 'Users'
+
+    def get_tweets(self, obj):
+        return [', '.join([t.id_str for t in obj.tweets.all()])]
+    get_tweets.short_description = 'Tweets'
 
 
 class TweetUserAdmin(admin.ModelAdmin):
@@ -90,9 +109,9 @@ class TargetAdmin(admin.ModelAdmin):
 class AnnotationAdmin(admin.ModelAdmin):
     list_display = ('created_by', 'target', 'media', 'get_text_in_media', 'get_description_of_media',
                     'get_interpretation', 'get_image_tag',)
-    list_filter = ('created_by', 'target', )
+    list_filter = ('created_by', 'target', PhaseFilter,)
 
-    ordering = ('created_by',)
+    ordering = ('-media__id', 'created_by',)
 
     list_per_page = 50
 

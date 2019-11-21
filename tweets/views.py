@@ -11,7 +11,7 @@ from django.urls import reverse
 from .models import Tweet, TweetMedia, TweetUser, TweetHashTag, Annotation, Target
 from django.utils.safestring import mark_safe
 
-phase_ranges = {'pre-train': (50000, 50100), 'train': (51100, 52100),
+phase_ranges = {'pre-train': (50000, 50100), 'train': (51100, 52100), '52mil': (52100,104100),
                 'classify': {'valentina': (52100, 65100),
                              'frespinoza': (65100, 78100),
                              'mnjarami': (78100, 91100),
@@ -185,7 +185,7 @@ def generate_tagger_summary(phase_range):
 
     medias = {}
     for m in all_medias:
-        medias[TweetMedia.objects.get(pk=m['media__id'])] = ['' for _ in users]
+        medias[TweetMedia.objects.get(pk=m['media__id'])] = [('', '', '', '') for _ in users]
 
     for i, user in enumerate(users):
         user_annotations = annotations.filter(created_by__username=user['created_by__username']).all()
@@ -203,7 +203,8 @@ def tagger_summary(request):
     phase_range = phase_ranges[current_phase]
     if request.user.is_authenticated:
         if request.user.username in ['jeperez', 'magdalena']:
-            phase_range = (52100, 104100)
+            username = 'valentina' #valentina frespinoza mnjarami japoblete
+            phase_range = phase_range[username]
         elif type(phase_range) is not tuple:
             phase_range = phase_range[request.user.username] if request.user.username in phase_range else phase_range[
                 'unknown']
@@ -245,6 +246,47 @@ def tagger_summary_csv(request):
 
         for i, (m, targets) in enumerate(medias.items(), start=1):
             writer.writerow([i] + [get_id(t[0]) for t in targets])
+
+        return response
+    else:
+        base_url = reverse('index')
+        login_url = '{}accounts/login/'.format(base_url)
+        print('redirectig to {}'.format(login_url))
+        response = redirect(login_url)
+        return response
+
+
+def tweets_summary_csv(request):
+    phase_range = phase_ranges['52mil']
+
+    if request.user.is_authenticated:
+        if type(phase_range) is not tuple:
+            phase_range = phase_range[request.user.username] if request.user.username in phase_range else phase_range[
+                'unknown']
+
+        annotations = Annotation.objects.filter(
+        media_id__gt=phase_range[0]).filter(
+        media_id__lte=phase_range[1]).exclude(
+        created_by__username='magdalena').order_by()
+
+        # Create the HttpResponse object with the appropriate CSV header.
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="tweets_summary_{}_phase.csv"'.format(current_phase)
+
+        writer = csv.writer(response)
+        first_row = ['MEDIA', 'Tweets', 'text', 'hashtags', 'created_at', 'favorite_count', 'retweet_count', 'lang', 'name', 'screen_name', 'location', 'url']
+        writer.writerow(first_row)
+
+        rows_count = 0
+        for a in annotations.all():
+            if a.target.name in ['Meme', 'Sticker']:
+                tweets = TweetMedia.objects.get(pk=a.media.id).tweets.all()
+                for t in tweets:
+                    hashtags = ['#' + str(h.text) for h in t.hashtags.all()]
+                    ' '.join(hashtags)
+                    writer.writerow(['"{}"'.format(a.media.id_str), '"{}"'.format(t.id_str), str(t.text), hashtags, str(t.created_at), t.favorite_count, t.retweet_count, str(t.lang), str(t.user.name), str(t.user.screen_name), str(t.user.location), str(t.user.url)])
+                    rows_count += 1
+        print('count of tweets in the summary: {}'.format(rows_count))
 
         return response
     else:
