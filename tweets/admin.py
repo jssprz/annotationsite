@@ -24,6 +24,7 @@ class PhaseFilter(admin.SimpleListFilter):
             phase_range = (52100,104100)
             return queryset.filter(media__id__gt=phase_range[0]).filter(media__id__lte=phase_range[1])
 
+
 class TweetMediaInline(admin.TabularInline):
     model = Tweet.medias.through
 
@@ -66,7 +67,7 @@ class TweetMediaAdmin(admin.ModelAdmin):
 
     search_fields = ('id_str', )
 
-    readonly_fields = ('image_tag',)
+    readonly_fields = ('id', 'image_tag',)
 
     inlines = (AnnotationInline,)
 
