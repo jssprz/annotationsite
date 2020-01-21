@@ -16,8 +16,15 @@ phase_ranges = {'pre-train': (50000, 50100), 'train': (51100, 52100), '52mil': (
                              'frespinoza': (65100, 78100),
                              'mnjarami': (78100, 91100),
                              'japoblete': (91100, 104100),
-                             'unknown': (104100, 154100)}}
-current_phase = 'classify'
+                             'unknown': (104100, 154100)},
+                'train2': (400000, 401000),
+                'classify2': {'valentina': (424147, 437147),
+                              'frespinoza': (437147, 450147),
+                              'mnjarami': (450147, 463147),
+                              'japoblete': (463147, 476147),
+                              'aarosenb': (476147, 489147),
+                              'unknown': (489147, 500000)}}
+current_phase = 'train2'
 
 
 def cors_serve(request, path, document_root=None, show_indexes=False):
