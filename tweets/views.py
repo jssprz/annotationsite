@@ -18,13 +18,13 @@ phase_ranges = {'pre-train': (50000, 50100), 'train': (51100, 52100), '52mil': (
                              'mnjarami': (78100, 91100),
                              'japoblete': (91100, 104100),
                              'unknown': (104100, 154100)},
-                'train2': (400000, 401000),
-                'classify2': {'valentina': (424147, 437147),
-                              'frespinoza': (437147, 450147),
-                              'mnjarami': (450147, 463147),
-                              'japoblete': (463147, 476147),
-                              'aarosenb': (476147, 489147),
-                              'unknown': (489147, 500000)}}
+                'train2': (424000, 425000),
+                'classify2': {'valentina': (425000, 438000),  # 424147
+                              'frespinoza': (438000, 451000),
+                              'mnjarami': (451000, 464000),
+                              'japoblete': (464000, 477000),
+                              'aarosenb': (477000, 490000),
+                              'unknown': (490000, 500000)}}
 current_phase = 'train2'
 
 
