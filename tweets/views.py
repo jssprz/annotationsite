@@ -8,6 +8,7 @@ from django.template import loader
 from django.views.static import serve as static_serve
 from django.db.models import Count, Q
 from django.urls import reverse
+from django.core.files.storage import FileSystemStorage
 from .models import Tweet, TweetMedia, TweetUser, TweetHashTag, Annotation, Target
 from django.utils.safestring import mark_safe
 
@@ -107,6 +108,9 @@ def tagger(request):
         print(len(medias))
         if len(medias) > 0:
             print(medias[0].id, medias[len(medias)//2].id, medias[len(medias)-1].id)
+            s = FileSystemStorage()
+            print(s.get_created_time(medias[0].local_image.name).date())
+            print(medias[0].local_image.__dict__)
     else:
         base_url = reverse('index')
         login_url = '{}accounts/login/'.format(base_url)
@@ -114,8 +118,12 @@ def tagger(request):
         response = redirect(login_url)
         return response
 
+    medias = medias[:25]
+    s = FileSystemStorage()
+    dates = [s.get_created_time(m.local_image.name).date() for m in medias]
+
     template = loader.get_template('tagger.html')
-    contex = {'medias': medias[:25], 'options': Target.objects.all()}
+    contex = {'medias': list(zip(medias, dates)), 'options': Target.objects.all()}
     return HttpResponse(template.render(contex, request))
 
 
