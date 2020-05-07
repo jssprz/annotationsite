@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Demo{% endblock %}
+
+{% block my_css_js %}
+{% load static %}
+<script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
+<script src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.11.1/jquery.validate.min.js"></script>
+<script src="{% static 'js/demo.js' %}" type="text/javascript"></script>
+{% endblock %}
+
+{% block content %}
+	<nav class="navbar navbar-dark bg-primary">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <span class="navbar-brand mb-0 h1">Búsqueda de memes (demo)</span>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+                <li class="nav-item active">
+                    <a class="nav-link" href="#">Tagger <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'tagger_statistics' %}">Estadísticas de la clasificación</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'tagger_summary' %}">Resumen de la clasificación</a>
+                </li>
+            </ul>
+            {% if user.is_authenticated %}
+            <span class="navbar-text">
+                Hola {{ user.username }}! <a class="nav-link" href="{% url 'logout' %}">logout</a>
+            </span>
+            {% endif %}
+        </div>
+    </nav>
+    <div class="container mt-4">
+    	<div id="loading_msg" class="col-sm-4">
+    		<span>Espere unos segundos mientras cargamos nuestros datos...</span>
+    	</div>
+    	<div id="searcher" style="display: none;">
+			<form id="query_form" action="{% url 'meme_search_demo' %}" method="post">
+			    {% csrf_token %}
+			    <div class="form-group row meme-field sticker-field" style="">
+				    <label for="text" class="col-sm-2 col-form-label">Consulta</label>
+				    <div class="col-sm-6">
+				        <input type="text" class="form-control" id="query" name="query" maxlength="1000" placeholder="Texto por el que desea buscar memes chilenos">
+				        <div class="invalid-feedback">
+				            Debe llenar este campo
+				        </div>
+				    </div>
+				</div>
+				<button type="submit" class="btn btn-primary meme-field sticker-field" style="">Buscar</button>
+				<div id="examples" class="row mt-2">
+					<div class="col-sm-8">
+						<span>Ejemplos: "leonardo dicaprio", "el chavo del 8", "tornado", "resentido", "bruto", "niño feliz", "niño serio interesante", "historia", "vida"</span>
+					</div>
+				</div>
+			    <div class="result row mt-4"></div>
+			</form>
+		</div>
+	</div>
+{% endblock %}

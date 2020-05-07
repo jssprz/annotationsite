@@ -375,3 +375,128 @@ def annotate(request, media_id_str):
             )
     else:
         pass
+
+import sys
+import h5py
+import hashlib
+import torch
+from gensim.models.keyedvectors import KeyedVectors
+
+semantic_memes_project_path = '../SemanticMemes'
+sys.path.append(semantic_memes_project_path)
+from model import MLP
+from data_loader import get_test_loader
+from utils import tokenizer_with_lemmatization_wo_stopwords
+
+visual_model = None
+wordvectors = None
+visual_embeddins = None
+
+def demo(request):
+    template = loader.get_template('demo.html')
+    context = {}
+    return HttpResponse(template.render(context, request))
+
+def initialize_data_for_demo(reques):
+    global visual_model, wordvectors, visual_embeddins, test_loader, texts
+
+    print('loading visual model...')
+    visual_model = MLP(2048, 4096, 300)
+    visual_model.load_state_dict(torch.load('./media/MemesDataSet/v1.1_chkpt_44.pkl')['visual_encoder'])
+    visual_model.eval()
+   # request.session['visual_model'] = visual_model
+    print('visual model loaded')
+
+    print('loading word vectors...')
+    wordvectors_file_vec = './media/fasttext-sbwc.vec'
+    count = 1000000
+    wordvectors = KeyedVectors.load_word2vec_format(wordvectors_file_vec, limit=count)
+    #request.session['wordvectors'] = wordvectors
+    print('word vectors loaded')
+
+    print('calculating visual mappings...')
+    f = h5py.File('./media/MemesDataSet/resnet_features.hdf5', 'r')
+    img_features = torch.from_numpy(f['resnet152_features'][50000:51999, :])
+    with open('./media/MemesDataSet/datainfo-v1.1.json', 'r') as f:
+        data = json.load(f)
+    test_loader = get_test_loader(wordvectors, data, img_features, 200)
+    img_features = img_features[torch.tensor(test_loader.dataset.ids) - 50000]
+    texts = test_loader.dataset.texts
+    f.close()
+    visual_embeddins = visual_model(img_features)
+    #request.session['visual_embeddins'] = visual_embeddins
+    print('visual mappings calculated')
+
+    response_data = {'result': 'data initialized'}
+    return HttpResponse(
+                json.dumps(response_data),
+                content_type="application/json"
+            )
+
+def meme_search_demo(request):
+    query = request.POST['query']
+
+    # wordvectors = request.session.get('wordvectors')
+    # visual_embeddins = request.session.get('visual_embeddins')
+
+    query_embedding = []
+    for word in tokenizer_with_lemmatization_wo_stopwords(query):
+        try:
+            vec = wordvectors[word]
+        except:
+            pass
+        else:
+            query_embedding.append(torch.from_numpy(vec).view(1, -1))
+    if len(query_embedding):
+        query_embedding = torch.mean(torch.cat(query_embedding, dim=0), dim=0)
+    else:
+        print('error')
+        query_embedding = torch.from_numpy(wordvectors['ambiguo'])
+
+    # dists = torch.pow(visual_embeddins - query_embedding, 2).sum(dim=1)
+    # result_rank = torch.argsort(dists)
+    sim = query_embedding.unsqueeze(0).mm(visual_embeddins.T).squeeze(0)
+    result_rank = torch.argsort(sim, descending=True)
+    print(result_rank)
+
+    def hashfile(path, blocksize=65536):
+        afile = open(path, 'rb')
+        hasher = hashlib.md5()
+        buf = afile.read(blocksize)
+        while len(buf) > 0:
+            hasher.update(buf)
+            buf = afile.read(blocksize)
+        afile.close()
+        return hasher.hexdigest()
+
+    ref_texts = {}
+    for idx in result_rank:
+        img_id = test_loader.dataset.ids[idx]
+        if img_id not in ref_texts:
+            ref_texts[img_id] = [texts[idx]]
+        else:
+            ref_texts[img_id].append(texts[idx])
+
+    response_data, dups, i = {'query_result': []}, [], 0
+    for idx in result_rank:
+        img_id = test_loader.dataset.ids[idx]
+        try:
+            path = './media/MemesDataSet/Meme/img_{:07d}.jpg'.format(img_id)
+            url = 'https://s06.imfd.cl/04/twitter/media/MemesDataSet/Meme/img_{:07d}.jpg'.format(img_id)
+            file_hash = hashfile(path)
+        except:
+            path = './media/MemesDataSet/Sticker/img_{:07d}.jpg'.format(img_id)
+            url = 'https://s06.imfd.cl/04/twitter/media/MemesDataSet/Sticker/img_{:07d}.jpg'.format(img_id)
+            file_hash = hashfile(path)
+
+        if not file_hash in dups:
+            response_data['query_result'].append({'img_url': url, 'ref_texts': ref_texts[img_id]})
+            dups.append(file_hash)
+            i+=1
+
+    response_data['query_result'] = response_data['query_result'][:3]
+    response_data['result_msg'] = "OK"
+    return HttpResponse(
+                json.dumps(response_data),
+                content_type="application/json"
+            )
