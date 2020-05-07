@@ -58,14 +58,14 @@ class TweetAdmin(admin.ModelAdmin):
 
 
 class TweetMediaAdmin(admin.ModelAdmin):
-    list_display = ('id_str', 'url', 'get_tweets', 'get_users', 'image_tag',)
+    list_display = ('id', 'id_str', 'url', 'get_tweets', 'get_users', 'image_tag',)
     #list_filter = ('target',)
 
     #list_editable = ('target',)
 
     list_per_page = 20
 
-    search_fields = ('id_str', )
+    search_fields = ('id', 'id_str', )
 
     readonly_fields = ('id', 'image_tag',)
 
@@ -111,6 +111,8 @@ class AnnotationAdmin(admin.ModelAdmin):
     list_display = ('created_by', 'target', 'media', 'get_text_in_media', 'get_description_of_media',
                     'get_interpretation', 'get_image_tag',)
     list_filter = ('created_by', 'target', PhaseFilter,)
+
+    search_fields = ('media__id_str', )
 
     ordering = ('-media__id', 'created_by',)
 

@@ -18,15 +18,38 @@ phase_ranges = {'pre-train': (50000, 50100), 'train': (51100, 52100), '52mil': (
                              'mnjarami': (78100, 91100),
                              'japoblete': (91100, 104100),
                              'unknown': (104100, 154100)},
-                'train2': (424000, 425000),
-                'classify2': {'valentina': (425000, 438000),  # 424147
-                              'frespinoza': (438000, 451000),
-                              'mnjarami': (451000, 464000),
-                              'japoblete': (464000, 477000),
-                              'aarosenb': (477000, 490000),
-                              'unknown': (490000, 500000)}}
+#                 'train2': (424000, 425000),
+#                 'classify2': {'valentina': (425000, 438000),  # 424147
+#                               'frespinoza': (438000, 451000),
+#                               'mnjarami': (451000, 464000),
+#                               'japoblete': (464000, 477000),
+#                               'aarosenb': (477000, 490000),
+#                               'unknown': (490000, 500000)}
+               }
 current_phase = 'train2'
+step = 170
+count = 1050
 
+def determine_phase_ranges(phase):
+    if phase == 'train2':
+        since = 440200 #424950
+        l = TweetMedia.objects.filter(id__gt=since).order_by('id').all()
+        #to = list(l[:count])[-1].id
+        #to = list(l[count:(count+300*step):step])[-1].id
+        to = list(l[:(count*step):step])[-1].id
+        print(to)
+        return (since, to)
+    elif phase == 'classify2':
+        since = 425000
+        result = {}
+        for u in ['valentina', 'frespinoza', 'mnjarami', 'japoblete', 'aarosenb', 'unknown']:
+            to = list(TweetMedia.objects.filter(id__gt=since).order_by('id').all()[:13000])[-1].id
+            result[u] = (since, to)
+            since = to
+        print(result)
+        return result
+    else:
+        return phase_ranges[phase]
 
 def cors_serve(request, path, document_root=None, show_indexes=False):
     """
@@ -89,8 +112,9 @@ def statistics(request):
 
 
 def tagger(request):
-    phase_range = phase_ranges[current_phase]
+    phase_range = determine_phase_ranges(current_phase)
     if request.user.is_authenticated:
+        print(request.user.username)
         if type(phase_range) is not tuple:
             phase_range = phase_range[request.user.username] if request.user.username in phase_range else phase_range['unknown']
         # apply the following filters to images
@@ -105,6 +129,8 @@ def tagger(request):
             id__gt=phase_range[0]).filter(
             id__lte=phase_range[1]).exclude(
             id__in=excluded_medias_ids).order_by('id').all()
+        #medias = list(medias[:250]) + list(medias[250:250+300*step:step])
+        medias=list(medias[:count*step:step])
         print(len(medias))
         if len(medias) > 0:
             print(medias[0].id, medias[len(medias)//2].id, medias[len(medias)-1].id)
@@ -128,7 +154,7 @@ def tagger(request):
 
 
 def tagger_statistics(request):
-    phase_range = phase_ranges[current_phase]
+    phase_range = determine_phase_ranges(current_phase)
 
     if request.user.is_authenticated:
         if type(phase_range) is not tuple:
@@ -215,7 +241,7 @@ def generate_tagger_summary(phase_range):
 
 
 def tagger_summary(request):
-    phase_range = phase_ranges[current_phase]
+    phase_range = determine_phase_ranges(current_phase)
     if request.user.is_authenticated:
         if request.user.username in ['jeperez', 'magdalena']:
             username = 'valentina' #valentina frespinoza mnjarami japoblete
@@ -240,7 +266,7 @@ def tagger_summary(request):
 
 
 def tagger_summary_csv(request):
-    phase_range = phase_ranges[current_phase]
+    phase_range = determine_phase_ranges(current_phase)
 
     if request.user.is_authenticated:
         if type(phase_range) is not tuple:
@@ -272,7 +298,7 @@ def tagger_summary_csv(request):
 
 
 def tweets_summary_csv(request):
-    phase_range = phase_ranges['52mil']
+    phase_range = determine_phase_ranges('52mil')
 
     if request.user.is_authenticated:
         if type(phase_range) is not tuple:
