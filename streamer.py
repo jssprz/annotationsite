@@ -35,6 +35,8 @@ class TwitterStreamer(TwythonStreamer):
 
         self.__save_media_dir = save_media_dir
 
+        self.__blocked_tweets = 0
+
         # with open(r'saved_tweets.csv', 'w') as csvfile:
         #     fieldnames = ['hashtags', 'text', 'user', 'location', 'media_urls', 'saved_media_urls']
         #     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -116,10 +118,10 @@ class TwitterStreamer(TwythonStreamer):
                                            media_url_https=m['media_url_https'], type=m['type'])
                     # download media
                     media_obj.cache()
-                    print('media downloaded from: {}'.format(m['media_url']))
+                    print('\nmedia downloaded from: {}'.format(m['media_url']))
                 else:
                     media_obj = TweetMedia.objects.get(id_str=m['id_str'])
-                    print('media {} reused'.format(m['id_str']))
+                    print('\nmedia {} reused'.format(m['id_str']))
 
                 media_obj.save()
                 media_objs.append(media_obj)
@@ -127,9 +129,9 @@ class TwitterStreamer(TwythonStreamer):
             tweet_obj.save()
             tweet_obj.hashtags.set(hashtags_objs)
             tweet_obj.medias.set(media_objs)
-            print('tweet saved')
+            print('tweet {} saved                                     '.format(tweet['id_str']))
         else:
-            print('duplicated tweet')
+            sys.stdout.write('\rtweet {} was saved before                          '.format(tweet['id_str']))
 
     def filter_tweet(self, tweet):
         """
@@ -139,10 +141,12 @@ class TwitterStreamer(TwythonStreamer):
         """
 
         if 'entities' not in tweet or 'media' not in tweet['entities']:
-            print('Tweet blocked: tweet without image')
+            self.__blocked_tweets += 1
+            sys.stdout.write('\rTweet {} blocked: tweet without image (total {})'.format(tweet['id_str'], self.__blocked_tweets))
             return False
         if ReportedUser.objects.filter(user__id_str=tweet['user']['id_str']).exists():
-            print('Tweet blocked: ({}, {}) is a reported user'.format(tweet['user']['id_str'], tweet['user']['screen_name']))
+            self.__blocked_tweets += 1
+            sys.stdout.write('\rTweet {} blocked: ({}, {}) is a reported user (total {})'.format(tweet['id_str'], tweet['user']['id_str'], tweet['user']['screen_name'], self.__blocked_tweets))
             return False
 
         return True
