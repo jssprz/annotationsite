@@ -402,7 +402,7 @@ def initialize_data_for_demo(reques):
 
     print('loading visual model...')
     visual_model = MLP(2048, 4096, 300)
-    visual_model.load_state_dict(torch.load('./media/MemesDataSet/v1.1_chkpt_44.pkl')['visual_encoder'])
+    visual_model.load_state_dict(torch.load('./media/MemesDataSet/v1.1_chkpt_125.pkl')['visual_encoder'])
     visual_model.eval()
    # request.session['visual_model'] = visual_model
     print('visual model loaded')
