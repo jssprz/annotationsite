@@ -42,7 +42,7 @@
 			<form id="query_form" action="{% url 'meme_search_demo' %}" method="post">
 			    {% csrf_token %}
 			    <div class="form-group row meme-field sticker-field" style="">
-				    <label for="text" class="col-sm-2 col-form-label">Consulta</label>
+				    <label for="text" class="col-form-label">Consulta:</label>
 				    <div class="col-sm-6">
 				        <input type="text" class="form-control" id="query" name="query" maxlength="1000" placeholder="Texto por el que desea buscar memes chilenos">
 				        <div class="invalid-feedback">
