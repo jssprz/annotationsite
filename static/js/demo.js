@@ -42,10 +42,15 @@ $(document).ready(function() {
                     console.log(data.result_msg);
                     result_elmment = form.find('.result').first()
                     result_elmment.empty();
-                    for(var i=0; i<data.query_result.length; i++){
-                        console.log(data.query_result[i])
-                        url = data.query_result[i].img_url;
-                        result_elmment.append('<div class="col-sm-4"><img src="'+url+'" style="width: 100%;"></div>')
+                    if(data.result_msg == 'OK'){
+                        for(var i=0; i<data.query_result.length; i++){
+                            console.log(data.query_result[i])
+                            url = data.query_result[i].img_url;
+                            result_elmment.append('<div class="col-sm-4"><img src="'+url+'" style="width: 100%;"></div>')
+                        }
+                    }
+                    else if(data.result_msg == 'Error'){
+                        result_elmment.append('<span style="text-color=red;">Su consulta no tiene palabras válidas para esta versión :(</span>')
                     }
                 }
             });

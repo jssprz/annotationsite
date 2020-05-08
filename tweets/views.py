@@ -435,6 +435,7 @@ def initialize_data_for_demo(reques):
 
 def meme_search_demo(request):
     query = request.POST['query']
+    response_data = {'query_result': []}
 
     # wordvectors = request.session.get('wordvectors')
     # visual_embeddins = request.session.get('visual_embeddins')
@@ -450,8 +451,13 @@ def meme_search_demo(request):
     if len(query_embedding):
         query_embedding = torch.mean(torch.cat(query_embedding, dim=0), dim=0)
     else:
-        print('error')
-        query_embedding = torch.from_numpy(wordvectors['ambiguo'])
+        print('the query "{}" has not valid words'.format(query))
+        #query_embedding = torch.from_numpy(wordvectors['ambiguo'])
+        response_data['result_msg'] = "Error"
+        return HttpResponse(
+                    json.dumps(response_data),
+                    content_type="application/json"
+                )
 
     # dists = torch.pow(visual_embeddins - query_embedding, 2).sum(dim=1)
     # result_rank = torch.argsort(dists)
@@ -477,7 +483,7 @@ def meme_search_demo(request):
         else:
             ref_texts[img_id].append(texts[idx])
 
-    response_data, dups, i = {'query_result': []}, [], 0
+    dups, i = [], 0
     for idx in result_rank:
         img_id = test_loader.dataset.ids[idx]
         try:
