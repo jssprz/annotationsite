@@ -409,7 +409,7 @@ def initialize_data_for_demo(reques):
 
     print('loading word vectors...')
     wordvectors_file_vec = './media/fasttext-sbwc.vec'
-    count = 1000000
+    count = 100000
     wordvectors = KeyedVectors.load_word2vec_format(wordvectors_file_vec, limit=count)
     #request.session['wordvectors'] = wordvectors
     print('word vectors loaded')
