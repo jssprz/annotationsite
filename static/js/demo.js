@@ -1,15 +1,16 @@
 $(document).ready(function() {
     var csrftoken = Cookies.get('csrftoken');
 
+    loading_elemment = $('#loading_msg')
     $.ajax({
         type: "POST",
         cache: false,
-        url: '/initialize_data_for_demo/',
+        url: loading_elemment.attr('data-url'),
         headers: {'X-CSRFToken': csrftoken},
         success: function (data) {
             console.log(data.result);
             if (data.result == 'data initialized'){
-                $('#loading_msg').hide();
+                loading_elemment.hide();
                 $('#searcher').show();
             }
         }
