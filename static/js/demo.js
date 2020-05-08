@@ -50,7 +50,7 @@ $(document).ready(function() {
                         }
                     }
                     else if(data.result_msg == 'Error'){
-                        result_elmment.append('<span style="text-color=red;">Su consulta no tiene palabras válidas para esta versión :(</span>')
+                        result_elmment.append('<span style="color=red;">Su consulta no tiene palabras válidas para esta versión :(</span>')
                     }
                 }
             });
