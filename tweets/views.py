@@ -416,7 +416,7 @@ def initialize_data_for_demo(reques):
         #request.session['wordvectors'] = wordvectors
         print('word vectors loaded')
 
-    if visual_embeddins == None:
+    if type(visual_embeddins) == type(None):
         print('calculating visual mappings...')
         f = h5py.File('./media/MemesDataSet/resnet_features.hdf5', 'r')
         img_features = torch.from_numpy(f['resnet152_features'][50000:51999, :])
