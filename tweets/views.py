@@ -400,32 +400,35 @@ def demo(request):
 def initialize_data_for_demo(reques):
     global visual_model, wordvectors, visual_embeddins, test_loader, texts
 
-    print('loading visual model...')
-    visual_model = MLP(2048, 4096, 300)
-    visual_model.load_state_dict(torch.load('./media/MemesDataSet/v1.1_chkpt_125.pkl')['visual_encoder'])
-    visual_model.eval()
-   # request.session['visual_model'] = visual_model
-    print('visual model loaded')
+    if visual_model == None:
+        print('loading visual model...')
+        visual_model = MLP(2048, 4096, 300)
+        visual_model.load_state_dict(torch.load('./media/MemesDataSet/v1.1_chkpt_125.pkl')['visual_encoder'])
+        visual_model.eval()
+       # request.session['visual_model'] = visual_model
+        print('visual model loaded')
 
-    print('loading word vectors...')
-    wordvectors_file_vec = './media/fasttext-sbwc.vec'
-    count = 100000
-    wordvectors = KeyedVectors.load_word2vec_format(wordvectors_file_vec, limit=count)
-    #request.session['wordvectors'] = wordvectors
-    print('word vectors loaded')
+    if wordvectors == None:
+        print('loading word vectors...')
+        wordvectors_file_vec = './media/fasttext-sbwc.vec'
+        count = 100000
+        wordvectors = KeyedVectors.load_word2vec_format(wordvectors_file_vec, limit=count)
+        #request.session['wordvectors'] = wordvectors
+        print('word vectors loaded')
 
-    print('calculating visual mappings...')
-    f = h5py.File('./media/MemesDataSet/resnet_features.hdf5', 'r')
-    img_features = torch.from_numpy(f['resnet152_features'][50000:51999, :])
-    with open('./media/MemesDataSet/datainfo-v1.1.json', 'r') as f:
-        data = json.load(f)
-    test_loader = get_test_loader(wordvectors, data, img_features, 200)
-    img_features = img_features[torch.tensor(test_loader.dataset.ids) - 50000]
-    texts = test_loader.dataset.texts
-    f.close()
-    visual_embeddins = visual_model(img_features)
-    #request.session['visual_embeddins'] = visual_embeddins
-    print('visual mappings calculated')
+    if visual_embeddins == None:
+        print('calculating visual mappings...')
+        f = h5py.File('./media/MemesDataSet/resnet_features.hdf5', 'r')
+        img_features = torch.from_numpy(f['resnet152_features'][50000:51999, :])
+        with open('./media/MemesDataSet/datainfo-v1.1.json', 'r') as f:
+            data = json.load(f)
+        test_loader = get_test_loader(wordvectors, data, img_features, 200)
+        img_features = img_features[torch.tensor(test_loader.dataset.ids) - 50000]
+        texts = test_loader.dataset.texts
+        f.close()
+        visual_embeddins = visual_model(img_features)
+        #request.session['visual_embeddins'] = visual_embeddins
+        print('visual mappings calculated')
 
     response_data = {'result': 'data initialized'}
     return HttpResponse(
