@@ -16,23 +16,18 @@ $(document).ready(function() {
         }
     });
 
-    $('form').validate({
-        rules: {
-            query: { required: true },
-        },
-        // highlight: function (element) {
-        //     $(element).closest('.control-group').removeClass('success').addClass('error');
-        // },
-        // success: function (element) {
-        //     element.text('OK!').addClass('valid')
-        //         .closest('.control-group').removeClass('error').addClass('success');
-        // }
-    });
-
     $('form').on('submit', function(e){
-        e.preventDefault();
+        e.preventDefault()
+
+        // Fetch form to apply custom Bootstrap validation
         var form = $(this);
-        if(form.valid()){
+
+        form.addClass('was-validated');
+
+        if (form[0].checkValidity() === false) {
+          e.stopPropagation()
+        }
+        else {
             $.ajax({
                 type: "POST",
                 cache: false,
