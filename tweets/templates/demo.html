@@ -35,10 +35,17 @@
         </div>
     </nav>
     <div class="container mt-4">
-    	<div id="loading_msg" class="col-sm-4" data-url="{% url 'initialize_data_for_demo' %}">
-    		<span>Espere unos segundos mientras cargamos nuestros datos...</span>
-    	</div>
-    	<div id="searcher" style="display: none;">
+        <div class="row">
+            <div class="col-sm-12">
+                <h3>Búsqueda semántica entre 50 memes aleatorios de tweets chilenos</h3>
+            </div>
+        </div>
+        <div class="row mt-4">
+    	    <div id="loading_msg" class="col-sm-12" data-url="{% url 'initialize_data_for_demo' %}">
+    		    <span>Espere unos segundos mientras cargamos nuestros datos...</span>
+    	    </div>
+        </div>
+    	<div id="searcher" class="center" style="display: none;">
 			<form id="query_form" class="" novalidate="" action="{% url 'meme_search_demo' %}" method="post">
                 {% csrf_token %}
                 <div class="form-row form-group align-items-center md-3">
@@ -49,7 +56,7 @@
                             Debe completar este campo
                         </div>-->
                     </div>
-                    <div class="col-auto align-items-top">
+                    <div class="col-auto align-items-center">
                         <button type="submit" class="btn btn-primary meme-field sticker-field" style="">Buscar</button>
                     </div>
                   </div>
