@@ -108,13 +108,13 @@ class TargetAdmin(admin.ModelAdmin):
 
 
 class AnnotationAdmin(admin.ModelAdmin):
-    list_display = ('created_by', 'target', 'media', 'get_text_in_media', 'get_description_of_media',
+    list_display = ('created_by', 'modified_at', 'target', 'media', 'get_text_in_media', 'get_description_of_media',
                     'get_interpretation', 'get_image_tag',)
     list_filter = ('created_by', 'target', PhaseFilter,)
 
     search_fields = ('media__id_str', )
 
-    ordering = ('-media__id', 'created_by',)
+    ordering = ('-modified_at','-media__id', 'created_by',)
 
     list_per_page = 50
 

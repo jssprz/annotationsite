@@ -1,6 +1,7 @@
 import json
 import csv
 import codecs
+import datetime
 
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpResponse
@@ -26,28 +27,38 @@ phase_ranges = {'pre-train': (50000, 50100), 'train': (51100, 52100), '52mil': (
 #                               'aarosenb': (477000, 490000),
 #                               'unknown': (490000, 500000)}
                }
-current_phase = 'train2'
-step = 170
-count = 1050
 
-def determine_phase_ranges(phase):
+phase_params = {'train2': {'step': 170, 'count': 1050},
+                'classify2': {'step': 10, 'count': 12500, 'start_date': datetime.date(2020, 7, 3)}}  #50
+current_phase = 'classify2'
+
+def determine_phase_ranges(phase, user=None):
+    count = phase_params[phase]['count']
+    step = phase_params[phase]['step']
+
     if phase == 'train2':
-        since = 440200 #424950
-        l = TweetMedia.objects.filter(id__gt=since).order_by('id').all()
+        since = 450000 #424950
+        ids = TweetMedia.objects.filter(id__gt=since).values_list('id', flat=True).order_by('id').all()
         #to = list(l[:count])[-1].id
         #to = list(l[count:(count+300*step):step])[-1].id
-        to = list(l[:(count*step):step])[-1].id
+        ids = list(ids[:(count*step):step])
+        to = ids[-1]
         print(to)
-        return (since, to)
+        return (since, to), ids
     elif phase == 'classify2':
-        since = 425000
+        #since = 630005 #630000
         result = {}
-        for u in ['valentina', 'frespinoza', 'mnjarami', 'japoblete', 'aarosenb', 'unknown']:
-            to = list(TweetMedia.objects.filter(id__gt=since).order_by('id').all()[:13000])[-1].id
-            result[u] = (since, to)
-            since = to
-        print(result)
-        return result
+        #ids = TweetMedia.objects.filter(id__gt=since).values_list('id', flat=True).order_by('id').all()
+        ids = TweetMedia.objects.filter(id__range=(440000, 630000)).values_list('id', flat=True).order_by('id').all()
+        for i, u in enumerate(['valentina', 'frespinoza', 'japoblete', 'aarosenb', 'unknown']):
+            #u_ids = list(ids[i:(count*step)+i:step])
+            u_ids = list(ids[i:len(ids):step])
+            result[u] = (u_ids[0], u_ids[-1]), u_ids
+        if user is None:
+            return (result['valentina'][0][0], result['aarosenb'][0][1]), [id for _, ids in result.values() for id in ids]
+        if user not in result:
+            return result['unknown']
+        return result[user]
     else:
         return phase_ranges[phase]
 
@@ -112,26 +123,32 @@ def statistics(request):
 
 
 def tagger(request):
-    phase_range = determine_phase_ranges(current_phase)
+    phase_range, ids = determine_phase_ranges(current_phase, request.user.username)
+    count = phase_params[current_phase]['count']
     if request.user.is_authenticated:
         print(request.user.username)
-        if type(phase_range) is not tuple:
-            phase_range = phase_range[request.user.username] if request.user.username in phase_range else phase_range['unknown']
+        #if type(phase_range) is not tuple:
+        #    phase_range = phase_range[request.user.username] if request.user.username in phase_range else phase_range['unknown']
         # apply the following filters to images
         # - first month (first 50000)
         # - less than 10 annotations
         # - current user has never annotated
         user_annotated_medias_ids = Annotation.objects.filter(created_by=request.user).values_list('media_id', flat=True)
-        full_annotated_medias_ids = Annotation.objects.annotate(num_per_media=Count('media')).filter(num_per_media__gte=5).values_list('media_id', flat=True)
-        excluded_medias_ids = list(user_annotated_medias_ids) + list(full_annotated_medias_ids)
-        print(excluded_medias_ids)
-        medias = TweetMedia.objects.filter(
-            id__gt=phase_range[0]).filter(
-            id__lte=phase_range[1]).exclude(
-            id__in=excluded_medias_ids).order_by('id').all()
+        #full_annotated_medias_ids = Annotation.objects.annotate(num_per_media=Count('media')).filter(num_per_media__gte=10).values_list('media_id', flat=True)
+        #excluded_medias_ids = list(user_annotated_medias_ids) + list(full_annotated_medias_ids)
+        excluded_medias_ids = list(user_annotated_medias_ids)
+        #print(excluded_medias_ids)
+        #medias = TweetMedia.objects.filter(
+        #    id__gt=phase_range[0]).filter(
+        #    id__lte=phase_range[1]).exclude(
+        #    id__in=excluded_medias_ids).order_by('id').all()
+        medias = TweetMedia.objects.filter(id__in=ids).exclude(id__in=excluded_medias_ids).order_by('id').all()
         #medias = list(medias[:250]) + list(medias[250:250+300*step:step])
-        medias=list(medias[:count*step:step])
-        print(len(medias))
+        #medias=list(medias[:count*step:step])
+
+        #assert len(medias) == count, '{} != {}'.format(len(medias), count)
+        print(len(medias), count)
+
         if len(medias) > 0:
             print(medias[0].id, medias[len(medias)//2].id, medias[len(medias)-1].id)
             s = FileSystemStorage()
@@ -154,17 +171,20 @@ def tagger(request):
 
 
 def tagger_statistics(request):
-    phase_range = determine_phase_ranges(current_phase)
+    phase_range, ids = determine_phase_ranges(current_phase)
 
     if request.user.is_authenticated:
         if type(phase_range) is not tuple:
             phase_range = phase_range[request.user.username] if request.user.username in phase_range else phase_range[
                 'unknown']
 
-        annotations = Annotation.objects.filter(
-            media_id__gt=phase_range[0]).filter(
-            media_id__lte=phase_range[1]).exclude(
-            created_by__username='magdalena').order_by()
+        #annotations = Annotation.objects.filter(
+        #    media_id__gt=phase_range[0]).filter(
+        #    media_id__lte=phase_range[1]).exclude(
+        #    created_by__username='magdalena').order_by()
+        #annotations = Annotation.objects.filter(media_id__in=ids).exclude(created_by__username='magdalena').order_by()
+        start_date = phase_params[current_phase]['start_date']
+        annotations = Annotation.objects.filter(media_id__in=ids).filter(created_at__gt=start_date).order_by()
 
         annotations_per_media = annotations.values('media__id_str').annotate(Count('created_by'))
         print(len(annotations_per_media.all()))
@@ -182,12 +202,16 @@ def tagger_statistics(request):
 
         print(medias_count)
 
-        icr_value = 0.0
+        #print(grouped_medias[2])
+
+        icr_value, forget_count = 0.0, 0
         if 4 in medias_count:
             annotations_per_target = annotations.filter(media__id_str__in=grouped_medias[4]).values('media', 'target').annotate(Count('created_by'))
 
             unanimous_count = 0
             for r in annotations_per_target.all():
+                if r['target'] == 5:  # 'Descartar' option
+                    forget_count += 1
                 if r['created_by__count'] == 4:
                     unanimous_count += 1
 
@@ -203,7 +227,8 @@ def tagger_statistics(request):
                 'count_of_annotations': annotations.count(),
                 'count_medias_per_count_of_annotations': medias_count,
                 'annotations_per_user': annotations_per_user.all(),
-                'icr': icr_value * 100.0
+                'icr': icr_value * 100.0,
+                'forget_count': forget_count
             }
         }
         return HttpResponse(template.render(context, request))
@@ -241,11 +266,11 @@ def generate_tagger_summary(phase_range):
 
 
 def tagger_summary(request):
-    phase_range = determine_phase_ranges(current_phase)
+    phase_range, ids = determine_phase_ranges(current_phase)
     if request.user.is_authenticated:
         if request.user.username in ['jeperez', 'magdalena']:
             username = 'valentina' #valentina frespinoza mnjarami japoblete
-            phase_range = phase_range[username]
+            #phase_range = phase_range[username]
         elif type(phase_range) is not tuple:
             phase_range = phase_range[request.user.username] if request.user.username in phase_range else phase_range[
                 'unknown']
@@ -266,7 +291,7 @@ def tagger_summary(request):
 
 
 def tagger_summary_csv(request):
-    phase_range = determine_phase_ranges(current_phase)
+    phase_range, ids = determine_phase_ranges(current_phase)
 
     if request.user.is_authenticated:
         if type(phase_range) is not tuple:
@@ -298,7 +323,7 @@ def tagger_summary_csv(request):
 
 
 def tweets_summary_csv(request):
-    phase_range = determine_phase_ranges('52mil')
+    phase_range = determine_phase_ranges(current_phase)
 
     if request.user.is_authenticated:
         if type(phase_range) is not tuple:
