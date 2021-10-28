@@ -49,8 +49,8 @@ class AnnotationInline(admin.TabularInline):
 
 class TweetAdmin(admin.ModelAdmin):
     list_display = ('id_str', 'created_at', 'user', 'text', 'favorite_count', 'retweet_count', 'location', 'lang', 'images_tags')
-    #list_filter = ('user', 'hashtags',)
-    search_fields = ('id_str', )
+    date_hierarchy = 'created_at'
+    search_fields = ('id_str', 'created_at')
 
     list_per_page = 30
 
